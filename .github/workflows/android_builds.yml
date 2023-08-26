@@ -39,6 +39,11 @@ jobs:
       - name: Setup python and scons
         uses: ./.github/actions/godot-deps
 
+      # Platform specific flags
+      - name: Checkout specific commit
+        shell: sh    
+        run: git apply ./modules/godot_dragonbones/build/android-no-rtti-patch.patch
+
       - name: Compilation (armv7)
         uses: ./.github/actions/godot-build
         with:
