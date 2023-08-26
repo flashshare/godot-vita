@@ -10,7 +10,7 @@ import pickle
 import sys
 import time
 from collections import OrderedDict
-
+import scu_builders
 # Local
 import methods
 import gles_builders
