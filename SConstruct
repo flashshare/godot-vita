@@ -10,10 +10,11 @@ import pickle
 import sys
 import time
 from collections import OrderedDict
-import scu_builders
+
 # Local
 import methods
 import gles_builders
+import scu_builders
 from platform_methods import run_in_subprocess
 
 # scan possible build platforms
@@ -94,6 +95,7 @@ env_base.__class__.add_library = methods.add_library
 env_base.__class__.add_program = methods.add_program
 env_base.__class__.CommandNoCache = methods.CommandNoCache
 env_base.__class__.disable_warnings = methods.disable_warnings
+env_base.__class__.force_optimization_on_debug = methods.force_optimization_on_debug
 
 env_base["x86_libtheora_opt_gcc"] = False
 env_base["x86_libtheora_opt_vc"] = False
@@ -123,7 +125,7 @@ opts.Add("arch", "Platform-dependent architecture (arm/arm64/x86/x64/mips/...)",
 opts.Add(EnumVariable("bits", "Target platform bits", "default", ("default", "32", "64")))
 opts.Add(EnumVariable("optimize", "Optimization type", "speed", ("speed", "size", "none")))
 opts.Add(BoolVariable("production", "Set defaults to build Godot for use in production", False))
-opts.Add(BoolVariable("use_lto", "Use link-time optimization", False))
+opts.Add(EnumVariable("lto", "Link-time optimization (production builds)", "none", ("none", "auto", "thin", "full")))
 
 # Components
 opts.Add(BoolVariable("deprecated", "Enable deprecated features", True))
@@ -154,6 +156,7 @@ opts.Add(BoolVariable("disable_advanced_gui", "Disable advanced GUI nodes and be
 opts.Add(BoolVariable("no_editor_splash", "Don't use the custom splash screen for the editor", True))
 opts.Add("system_certs_path", "Use this path as SSL certificates default for editor (for package maintainers)", "")
 opts.Add(BoolVariable("use_precise_math_checks", "Math checks use very precise epsilon (debug option)", False))
+opts.Add(BoolVariable("scu_build", "Use single compilation unit build", False))
 opts.Add(
     EnumVariable(
         "rids",
@@ -330,6 +333,9 @@ if env_base["target"] == "debug":
     # DEV_ENABLED enables *engine developer* code which should only be compiled for those
     # working on the engine itself.
     env_base.Append(CPPDEFINES=["DEV_ENABLED"])
+else:
+    # Disable assert() for production targets (only used in thirdparty code).
+    env_base.Append(CPPDEFINES=["NDEBUG"])
 
 # SCons speed optimization controlled by the `fast_unsafe` option, which provide
 # more than 10 s speed up for incremental rebuilds.
@@ -389,34 +395,6 @@ if selected_platform in platform_list:
             )
             env.SetOption("num_jobs", safer_cpu_count)
 
-    # 'dev' and 'production' are aliases to set default options if they haven't been set
-    # manually by the user.
-    if env["dev"]:
-        env["verbose"] = methods.get_cmdline_bool("verbose", True)
-        env["warnings"] = ARGUMENTS.get("warnings", "extra")
-        env["werror"] = methods.get_cmdline_bool("werror", True)
-    if env["production"]:
-        env["use_static_cpp"] = methods.get_cmdline_bool("use_static_cpp", True)
-        env["use_lto"] = methods.get_cmdline_bool("use_lto", True)
-        print("use_lto is: " + str(env["use_lto"]))
-        env["debug_symbols"] = methods.get_cmdline_bool("debug_symbols", False)
-        if not env["tools"] and env["target"] == "debug":
-            print(
-                "WARNING: Requested `production` build with `tools=no target=debug`, "
-                "this will give you a full debug template (use `target=release_debug` "
-                "for an optimized template with debug features)."
-            )
-        if env.msvc:
-            print(
-                "WARNING: For `production` Windows builds, you should use MinGW with GCC "
-                "or Clang instead of Visual Studio, as they can better optimize the "
-                "GDScript VM in a very significant way. MSVC LTO also doesn't work "
-                "reliably for our use case."
-                "If you want to use MSVC nevertheless for production builds, set "
-                "`debug_symbols=no use_lto=no` instead of the `production=yes` option."
-            )
-            Exit(255)
-
     env.extra_suffix = ""
 
     if env["extra_suffix"] != "":
@@ -439,14 +417,44 @@ if selected_platform in platform_list:
     env["LINKFLAGS"] = ""
     env.Append(LINKFLAGS=str(LINKFLAGS).split())
 
-    # Platform specific flags
+    # Platform specific flags.
+    # These can sometimes override default options.
     flag_list = platform_flags[selected_platform]
     for f in flag_list:
         if not (f[0] in ARGUMENTS):  # allow command line to override platform flags
             env[f[0]] = f[1]
 
-    # Must happen after the flags definition, so that they can be used by platform detect
+    # 'dev' and 'production' are aliases to set default options if they haven't been
+    # set manually by the user.
+    # These need to be checked *after* platform specific flags so that different
+    # default values can be set (e.g. to keep LTO off for `production` on some platforms).
+    if env["dev"]:
+        env["verbose"] = methods.get_cmdline_bool("verbose", True)
+        env["warnings"] = ARGUMENTS.get("warnings", "extra")
+        env["werror"] = methods.get_cmdline_bool("werror", True)
+    if env["production"]:
+        env["use_static_cpp"] = methods.get_cmdline_bool("use_static_cpp", True)
+        env["debug_symbols"] = methods.get_cmdline_bool("debug_symbols", False)
+        # LTO "auto" means we handle the preferred option in each platform detect.py.
+        env["lto"] = ARGUMENTS.get("lto", "auto")
+        if not env["tools"] and env["target"] == "debug":
+            print(
+                "WARNING: Requested `production` build with `tools=no target=debug`, "
+                "this will give you a full debug template (use `target=release_debug` "
+                "for an optimized template with debug features)."
+            )
+
+    # Run SCU file generation script if in a SCU build.
+    if env["scu_build"]:
+        methods.set_scu_folders(scu_builders.generate_scu_files(env["verbose"], env_base["target"] != "debug"))
+
+    # Must happen after the flags' definition, as configure is when most flags
+    # are actually handled to change compile options, etc.
     detect.configure(env)
+
+    # Needs to happen after configure to handle "auto".
+    if env["lto"] != "none":
+        print("Using LTO: " + env["lto"])
 
     # Set our C and C++ standard requirements.
     # Prepending to make it possible to override
@@ -461,6 +469,16 @@ if selected_platform in platform_list:
         # MSVC doesn't have clear C standard support, /std only covers C++.
         # We apply it to CCFLAGS (both C and C++ code) in case it impacts C features.
         env.Prepend(CCFLAGS=["/std:c++14"])
+
+    # Handle renamed options.
+    if "use_lto" in ARGUMENTS or "use_thinlto" in ARGUMENTS:
+        print("Error: The `use_lto` and `use_thinlto` boolean options have been unified to `lto=<none|thin|full>`.")
+        print("       Please adjust your scripts accordingly.")
+        Exit(255)
+    if "use_lld" in ARGUMENTS:
+        print("Error: The `use_lld` boolean option has been replaced by `linker=<default|bfd|gold|lld|mold>`.")
+        print("       Please adjust your scripts accordingly.")
+        Exit(255)
 
     # Configure compiler warnings
     if env.msvc:  # MSVC
@@ -534,7 +552,6 @@ if selected_platform in platform_list:
             print("       Use `tools=no target=release` to build a release export template.")
             Exit(255)
         suffix += ".opt"
-        env.Append(CPPDEFINES=["NDEBUG"])
     elif env["target"] == "release_debug":
         if env["tools"]:
             suffix += ".opt.tools"
@@ -611,7 +628,7 @@ if selected_platform in platform_list:
 
     env.module_list = modules_enabled
 
-    methods.update_version(env.module_version_string)
+    methods.generate_version_header(env.module_version_string)
 
     env["PROGSUFFIX"] = suffix + env.module_version_string + env["PROGSUFFIX"]
     env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
