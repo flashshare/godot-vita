@@ -1,7 +1,7 @@
 #ifndef GDBONE2D_H
 #define GDBONE2D_H
 
-#include "src/dragonBones/DragonBonesHeaders.h"
+#include "dragonBones/DragonBonesHeaders.h"
 #include <memory>
 #include "scene/2d/skeleton_2d.h"
 #include "core/version_generated.gen.h"

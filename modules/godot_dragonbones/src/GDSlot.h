@@ -2,7 +2,7 @@
 #define GDSLOT_H
 
 #include <memory>
-#include "src/dragonBones/DragonBonesHeaders.h"
+#include "dragonBones/DragonBonesHeaders.h"
 #include "GDDisplay.h"
 
 #if (VERSION_MAJOR >= 3)

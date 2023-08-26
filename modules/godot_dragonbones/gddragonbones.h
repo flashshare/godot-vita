@@ -2,7 +2,7 @@
 #define GDDRAGONBONES_H
 
 #include "scene/2d/node_2d.h"
-#include "GDFactory.h"
+#include "src/GDFactory.h"
 #include "scene/resources/texture.h"
 
 #if (VERSION_MAJOR) >= 4

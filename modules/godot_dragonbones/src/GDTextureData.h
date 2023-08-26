@@ -2,7 +2,7 @@
 #define GDTEXTUREDATA_H
 
 #include <memory>
-#include "src/dragonBones/DragonBonesHeaders.h"
+#include "dragonBones/DragonBonesHeaders.h"
 #include "scene/resources/texture.h"
 #include "core/version.h"
 

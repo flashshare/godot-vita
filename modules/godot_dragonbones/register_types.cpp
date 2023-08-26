@@ -31,7 +31,7 @@ public:
 #if (VERSION_MAJOR >=4)
 	virtual RES load(const String &p_path, const String &p_original_path, Error *r_error, bool p_use_sub_threads, float *r_progress, bool p_no_cache) {
 #else
-	virtual RES load(const String &p_path, const String &p_original_path, Error *r_error, bool p_no_subresource_cache = false) {
+	virtual RES load(const String &p_path, const String &p_original_path, Error *r_error) {
 #endif
 		float __tm_start = OS::get_singleton()->get_ticks_msec();
 		GDDragonBones::GDDragonBonesResource* __p_res = memnew(GDDragonBones::GDDragonBonesResource);

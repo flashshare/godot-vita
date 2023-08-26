@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/dragonBones/DragonBonesHeaders.h"
+#include "dragonBones/DragonBonesHeaders.h"
 
 #include "GDArmatureDisplay.h"
 #include "GDSlot.h"

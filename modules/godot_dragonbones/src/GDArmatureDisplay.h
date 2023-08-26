@@ -2,7 +2,7 @@
 #define GDARMATUREDESPLAY_H
 
 #include "scene/2d/node_2d.h"
-#include "src/dragonBones/DragonBonesHeaders.h"
+#include "dragonBones/DragonBonesHeaders.h"
 #include "GDDisplay.h"
 #include "GDSlot.h"
 #include "GDBone2D.h"
