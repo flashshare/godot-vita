@@ -53,9 +53,6 @@ public:
 #if (VERSION_MAJOR >= 4)
         // loading bones data
         __bret = __p_ref->load_bones_data(p_path.ascii().get_data(), p_no_cache);
-#elif (VERSION_MAJOR == 3 && VERSION_MINOR >= 6)
-        // loading bones data
-        __bret = __p_ref->load_bones_data(p_path.ascii().get_data(), p_no_subresource_cache);
 #else
         // loading bones data
         __bret = __p_ref->load_bones_data(p_path.ascii().get_data());
