@@ -2,6 +2,7 @@
 #define GDDRAGONBONES_H
 
 #include "scene/2d/node_2d.h"
+#include "src/dragonBones/DragonBonesHeaders.h"
 #include "src/GDFactory.h"
 #include "scene/resources/texture.h"
 
