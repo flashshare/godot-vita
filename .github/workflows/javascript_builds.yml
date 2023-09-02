@@ -35,6 +35,12 @@ jobs:
         uses: ./.github/actions/godot-cache
         continue-on-error: true
 
+      # Platform specific flags to convert from no-rtti (default by Godot) to rtti for android compile (required by DragonBones)
+      - name: specific flags from no-rtti to rtti
+        shell: sh    
+        run: git apply ./modules/godot_dragonbones/build/js-no-rtti-patch.patch
+
+        
       - name: Setup python and scons
         uses: ./.github/actions/godot-deps
 
