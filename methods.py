@@ -890,7 +890,7 @@ def generate_vs_project(env, num_jobs):
                     for plat_id in ModuleConfigs.PLATFORM_IDS
                 ]
                 self.arg_dict["cpppaths"] += ModuleConfigs.for_every_variant(env["CPPPATH"] + [includes])
-                self.arg_dict["cppdefines"] += ModuleConfigs.for_every_variant(list(env["CPPDEFINES"]) + defines)
+                self.arg_dict["cppdefines"] += ModuleConfigs.for_every_variant(env["CPPDEFINES"] + defines)
                 self.arg_dict["cmdargs"] += ModuleConfigs.for_every_variant(cli_args)
 
             def build_commandline(self, commands):
@@ -1078,17 +1078,6 @@ def get_compiler_version(env):
         return list(map(int, match.group().split(".")))
     else:
         return None
-
-
-def is_vanilla_clang(env):
-    if not using_clang(env):
-        return False
-    try:
-        version = decode_utf8(subprocess.check_output([env.subst(env["CXX"]), "--version"]).strip())
-    except (subprocess.CalledProcessError, OSError):
-        print("Couldn't parse CXX environment variable to infer compiler version.")
-        return False
-    return not version.startswith("Apple")
 
 
 def using_gcc(env):
