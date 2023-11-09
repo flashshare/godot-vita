@@ -201,6 +201,9 @@ NetSocketPosix::NetError NetSocketPosix::_get_socket_error() const {
 		return ERR_NET_IN_PROGRESS;
 	if (err == WSAEWOULDBLOCK)
 		return ERR_NET_WOULD_BLOCK;
+	if (err == WSAEMSGSIZE || err == WSAENOBUFS) {
+		return ERR_NET_BUFFER_TOO_SMALL;
+	}
 	print_verbose("Socket error: " + itos(err));
 	return ERR_NET_OTHER;
 #else
@@ -212,6 +215,9 @@ NetSocketPosix::NetError NetSocketPosix::_get_socket_error() const {
 	}
 	if (errno == EAGAIN || errno == EWOULDBLOCK) {
 		return ERR_NET_WOULD_BLOCK;
+	}
+	if (errno == ENOBUFS) {
+		return ERR_NET_BUFFER_TOO_SMALL;
 	}
 	print_verbose("Socket error: " + itos(errno));
 	return ERR_NET_OTHER;
@@ -543,6 +549,9 @@ Error NetSocketPosix::recv(uint8_t *p_buffer, int p_len, int &r_read) {
 		if (err == ERR_NET_WOULD_BLOCK) {
 			return ERR_BUSY;
 		}
+		if (err == ERR_NET_BUFFER_TOO_SMALL) {
+			return ERR_OUT_OF_MEMORY;
+		}
 
 		return FAILED;
 	}
@@ -563,6 +572,9 @@ Error NetSocketPosix::recvfrom(uint8_t *p_buffer, int p_len, int &r_read, IP_Add
 		NetError err = _get_socket_error();
 		if (err == ERR_NET_WOULD_BLOCK) {
 			return ERR_BUSY;
+		}
+		if (err == ERR_NET_BUFFER_TOO_SMALL) {
+			return ERR_OUT_OF_MEMORY;
 		}
 
 		return FAILED;
@@ -600,6 +612,9 @@ Error NetSocketPosix::send(const uint8_t *p_buffer, int p_len, int &r_sent) {
 		if (err == ERR_NET_WOULD_BLOCK) {
 			return ERR_BUSY;
 		}
+		if (err == ERR_NET_BUFFER_TOO_SMALL) {
+			return ERR_OUT_OF_MEMORY;
+		}
 
 		return FAILED;
 	}
@@ -618,6 +633,9 @@ Error NetSocketPosix::sendto(const uint8_t *p_buffer, int p_len, int &r_sent, IP
 		NetError err = _get_socket_error();
 		if (err == ERR_NET_WOULD_BLOCK) {
 			return ERR_BUSY;
+		}
+		if (err == ERR_NET_BUFFER_TOO_SMALL) {
+			return ERR_OUT_OF_MEMORY;
 		}
 
 		return FAILED;
