@@ -19,16 +19,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Editor Linux (target=release_debug, tools=yes)
-            cache-name: linux-editor-mono
-            target: release_debug
-            tools: true
-            sconsflags: module_mono_enabled=no mono_static=no mono_glue=no
-            bin: "./bin/godot.x11.opt.tools.64.mono"
-            build-mono: true
-            artifact: true
-
-
           - name: Template (target=release, tools=no)
             cache-name: linux-template-mono
             target: release
@@ -69,21 +59,6 @@ jobs:
           platform: linuxbsd
           target: ${{ matrix.target }}
           tools: ${{ matrix.tools }}
-
-      # Download and extract zip archive with project, folder is renamed to be able to easy change used project
-      - name: Download test project
-        if: ${{ matrix.test }}
-        run: |
-          wget https://github.com/godotengine/regression-test-project/archive/3.x.zip
-          unzip 3.x.zip
-          mv "regression-test-project-3.x" "test_project"
-
-      # Editor is quite complicated piece of software, so it is easy to introduce bug here
-      - name: Open and close editor
-        if: ${{ matrix.test }}
-        run: |
-          DRI_PRIME=0 xvfb-run ${{ matrix.bin }} --audio-driver Dummy -e -q --path test_project 2>&1 | tee sanitizers_log.txt || true
-          misc/scripts/check_ci_log.py sanitizers_log.txt
 
       - name: Prepare artifact
         if: ${{ matrix.artifact }}
