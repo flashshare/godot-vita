@@ -177,7 +177,7 @@ def configure(env):
     if env["tools"]:
         env.Append(CXXFLAGS=["-frtti"])
     else:
-        env.Append(CXXFLAGS=["-fno-exceptions"]) # higher built size but dragon-bones will work for android and js # env.Append(CXXFLAGS=["-fno-rtti", "-fno-exceptions"])
+        env.Append(CXXFLAGS=["-fno-rtti", "-fno-exceptions"])
         # Don't use dynamic_cast, necessary with no-rtti.
         env.Append(CPPDEFINES=["NO_SAFE_CAST"])
 
