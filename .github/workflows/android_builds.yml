@@ -39,10 +39,10 @@ jobs:
       - name: Setup python and scons
         uses: ./.github/actions/godot-deps
 
-      # Platform specific flags to convert from no-rtti (default by Godot) to rtti for android compile (required by DragonBones)
-      - name: specific flags from no-rtti to rtti
-        shell: sh    
-        run: git apply ./modules/godot_dragonbones/build/android-no-rtti-patch.patch
+      # # Platform specific flags to convert from no-rtti (default by Godot) to rtti for android compile (required by DragonBones)
+      # - name: specific flags from no-rtti to rtti
+      #   shell: sh    
+      #   run: git apply ./modules/godot_dragonbones/build/android-no-rtti-patch.patch
 
       - name: Compilation (armv7)
         uses: ./.github/actions/godot-build
