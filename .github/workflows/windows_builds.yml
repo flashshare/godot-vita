@@ -1,7 +1,7 @@
 name: 🏁 Windows Builds
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 # Global Settings
 # SCONS_CACHE for windows must be set in the build environment

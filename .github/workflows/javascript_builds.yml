@@ -1,7 +1,7 @@
 name: 🌐 JavaScript Builds
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 # Global Settings
 env:
