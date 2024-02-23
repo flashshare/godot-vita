@@ -1,5 +1,7 @@
 name: 🎮 PSVita Builds
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
 
 # Global Settings
 env:
