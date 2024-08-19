@@ -439,6 +439,10 @@ void OS_Vita::key(uint32_t p_key, bool p_pressed) {
 	ev->set_scancode(p_key);
 	ev->set_unicode(p_key);
 	input->parse_input_event(ev);
+}
+
+bool OS_Vita::has_touchscreen_ui_hint() const {
+	return true;
 };
 
 bool OS_Vita::has_virtual_keyboard() const {
@@ -603,15 +607,70 @@ bool OS_Vita::set_environment(const String &p_var, const String &p_value) const 
 }
 
 OS::Date OS_Vita::get_date(bool local) const {
-	return OS::Date();
+	SceDateTime sceDateTime;
+	if (local)
+		sceRtcGetCurrentClockUtc(&sceDateTime);
+	else
+		sceRtcGetCurrentClockLocalTime(&sceDateTime);
+	// TODO: Daylight calculation.
+	bool daylight = false;
+	Date date;
+	date.day = sceDateTime.day;
+	date.month = Month(sceDateTime.month);
+	date.year = sceDateTime.year;
+	date.weekday = Weekday(sceRtcGetDayOfWeek(sceDateTime.year, sceDateTime.month, sceDateTime.day));
+	date.dst = daylight;
+	return date;
 }
 
 OS::Time OS_Vita::get_time(bool local) const {
-	return OS::Time();
+	SceDateTime sceDateTime;
+	if (local)
+		sceRtcGetCurrentClockUtc(&sceDateTime);
+	else
+		sceRtcGetCurrentClockLocalTime(&sceDateTime);
+	Time time;
+	time.hour = sceDateTime.hour;
+	time.min = sceDateTime.minute;
+	time.sec = sceDateTime.second;
+	return time;
 }
 
 OS::TimeZoneInfo OS_Vita::get_time_zone_info() const {
-	return OS::TimeZoneInfo();
+	OS::TimeZoneInfo timeZoneInfo;
+	SceDateTime sceDateTimeUtc;
+	SceDateTime sceDateTimeLocal;
+	sceRtcGetCurrentClockUtc(&sceDateTimeUtc);
+	sceRtcGetCurrentClockLocalTime(&sceDateTimeLocal);
+	int hourBias = sceDateTimeLocal.hour - sceDateTimeUtc.hour;
+	if (hourBias < 0) {
+		hourBias += 24;
+	}
+	String sign = (hourBias >= 0) ? "+" : "-";
+	int local_offset = (hourBias > 0 ? hourBias : -hourBias);
+	String offset = (local_offset < 10) ? "0" + String::num_int64(local_offset) : String::num_int64(local_offset);
+	timeZoneInfo.name = "UTC" + sign + offset;
+	timeZoneInfo.bias = hourBias * 60;
+	return timeZoneInfo;
+}
+
+uint64_t OS_Vita::get_unix_time() const {
+	uint64_t unixTime;
+	SceDateTime sceDateTimeUtc;
+	sceRtcGetCurrentClockUtc(&sceDateTimeUtc);
+	sceRtcConvertDateTimeToTime64_t(&sceDateTimeUtc, &unixTime);
+	return unixTime;
+}
+
+uint64_t OS_Vita::get_system_time_secs() const {
+	return get_system_time_msecs() / 1000L;
+}
+
+uint64_t OS_Vita::get_system_time_msecs() const {
+	struct timespec tv_now = { 0, 0 };
+	clock_gettime(CLOCK_MONOTONIC, &tv_now);
+	uint64_t longtime = ((uint64_t)tv_now.tv_nsec / 1000000L) + (uint64_t)tv_now.tv_sec * 1000L;
+	return longtime;
 }
 
 void OS_Vita::delay_usec(uint32_t p_usec) const {

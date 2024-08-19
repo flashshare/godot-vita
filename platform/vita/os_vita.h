@@ -119,6 +119,7 @@ public:
 	virtual bool can_draw() const;
 
 	void key(uint32_t p_key, bool p_pressed);
+	virtual bool has_touchscreen_ui_hint() const;
 	virtual bool has_virtual_keyboard() const;
 	virtual void show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect = Rect2(), bool p_multiline = false, int p_max_input_length = -1, int p_cursor_start = -1, int p_cursor_end = -1);
 	virtual void hide_virtual_keyboard();
@@ -155,6 +156,9 @@ public:
 	virtual Date get_date(bool local = false) const;
 	virtual Time get_time(bool local = false) const;
 	virtual TimeZoneInfo get_time_zone_info() const;
+	virtual uint64_t get_unix_time() const;
+	virtual uint64_t get_system_time_secs() const;
+	virtual uint64_t get_system_time_msecs() const;
 	virtual void delay_usec(uint32_t p_usec) const;
 	virtual uint64_t get_ticks_usec() const;
 	virtual String get_stdin_string();

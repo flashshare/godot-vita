@@ -359,7 +359,7 @@ void Spatial::_disable_client_physics_interpolation() {
 }
 
 Transform Spatial::_get_global_transform_interpolated(real_t p_interpolation_fraction) {
-	ERR_FAIL_NULL_V(is_inside_tree(), Transform());
+	ERR_FAIL_COND_V(!is_inside_tree(), Transform());
 
 	// set in motion the mechanisms for client side interpolation if not already active
 	if (!_is_physics_interpolated_client_side()) {
@@ -407,7 +407,14 @@ Transform Spatial::get_global_transform_interpolated() {
 	// Pass through if physics interpolation is switched off.
 	// This is a convenience, as it allows you to easy turn off interpolation
 	// without changing any code.
-	if (Engine::get_singleton()->is_in_physics_frame() || !is_physics_interpolated_and_enabled()) {
+	if (!is_physics_interpolated_and_enabled()) {
+		return get_global_transform();
+	}
+
+	// If we are in the physics frame, the interpolated global transform is meaningless.
+	// However, there is an exception, we may want to use this as a means of starting off the client
+	// interpolation pump if not already started (when _is_physics_interpolated_client_side() is false).
+	if (Engine::get_singleton()->is_in_physics_frame() && _is_physics_interpolated_client_side()) {
 		return get_global_transform();
 	}
 
@@ -915,6 +922,10 @@ void Spatial::set_merging_mode(MergingMode p_mode) {
 	_propagate_merging_allowed(merging_allowed);
 }
 
+void Spatial::set_lod_range(float p_range) {
+	data.lod_range = p_range;
+}
+
 void Spatial::force_update_transform() {
 	ERR_FAIL_COND(!is_inside_tree());
 	if (!xform_change.in_list()) {
@@ -993,6 +1004,9 @@ void Spatial::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_merging_mode", "mode"), &Spatial::set_merging_mode);
 	ClassDB::bind_method(D_METHOD("get_merging_mode"), &Spatial::get_merging_mode);
 
+	ClassDB::bind_method(D_METHOD("set_lod_range", "range"), &Spatial::set_lod_range);
+	ClassDB::bind_method(D_METHOD("get_lod_range"), &Spatial::get_lod_range);
+
 	ClassDB::bind_method(D_METHOD("to_local", "global_point"), &Spatial::to_local);
 	ClassDB::bind_method(D_METHOD("to_global", "local_point"), &Spatial::to_global);
 
@@ -1024,6 +1038,7 @@ void Spatial::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "visible"), "set_visible", "is_visible");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "gizmo", PROPERTY_HINT_RESOURCE_TYPE, "SpatialGizmo", 0), "set_gizmo", "get_gizmo");
 	ADD_GROUP("Misc", "");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "lod_range", PROPERTY_HINT_RANGE, "0,1024,0.01,or_greater"), "set_lod_range", "get_lod_range");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "merging_mode", PROPERTY_HINT_ENUM, "Inherit,Off,On"), "set_merging_mode", "get_merging_mode");
 
 	ADD_SIGNAL(MethodInfo("visibility_changed"));

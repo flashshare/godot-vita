@@ -97,51 +97,8 @@ void GDScriptParser::_set_end_statement_error(String p_name) {
 }
 
 bool GDScriptParser::_enter_indent_block(BlockNode *p_block) {
-	if (!_parse_colon()) {
-		return false;
-	}
-
-	if (tokenizer->get_token() != GDScriptTokenizer::TK_NEWLINE) {
-		// Be more Python-like.
-		IndentLevel current_level = indent_level.back()->get();
-		indent_level.push_back(current_level);
-		return true;
-	}
-
-	return _parse_indent_block_newlines(p_block);
-}
-
-bool GDScriptParser::_enter_inner_class_indent_block() {
-	if (!_parse_colon()) {
-		return false;
-	}
-
-	if (tokenizer->get_token() != GDScriptTokenizer::TK_NEWLINE) {
-		// Check Python-like one-liner class declaration "class Foo: pass".
-		// Note: only "pass" is allowed on the same line after the colon.
-		if (tokenizer->get_token() != GDScriptTokenizer::TK_CF_PASS) {
-			return false;
-		}
-
-		GDScriptTokenizer::Token token = tokenizer->get_token(1);
-		if (token != GDScriptTokenizer::TK_NEWLINE && token != GDScriptTokenizer::TK_EOF) {
-			int line = tokenizer->get_token_line();
-			int col = tokenizer->get_token_column();
-			String message = "Invalid syntax: unexpected \"";
-			message += GDScriptTokenizer::get_token_name(token);
-			message += "\".";
-			_set_error(message, line, col);
-			return false;
-		}
-		return true;
-	}
-
-	return _parse_indent_block_newlines();
-}
-
-bool GDScriptParser::_parse_colon() {
 	if (tokenizer->get_token() != GDScriptTokenizer::TK_COLON) {
-		// Report location at the previous token (on the previous line).
+		// report location at the previous token (on the previous line)
 		int error_line = tokenizer->get_token_line(-1);
 		int error_column = tokenizer->get_token_column(-1);
 		_set_error("':' expected at end of line.", error_line, error_column);
@@ -153,12 +110,19 @@ bool GDScriptParser::_parse_colon() {
 		return false;
 	}
 
-	return true;
-}
+	if (tokenizer->get_token() != GDScriptTokenizer::TK_NEWLINE) {
+		// be more python-like
+		IndentLevel current_level = indent_level.back()->get();
+		indent_level.push_back(current_level);
+		return true;
+		//_set_error("newline expected after ':'.");
+		//return false;
+	}
 
-bool GDScriptParser::_parse_indent_block_newlines(BlockNode *p_block) {
 	while (true) {
-		if (tokenizer->get_token(1) == GDScriptTokenizer::TK_EOF) {
+		if (tokenizer->get_token() != GDScriptTokenizer::TK_NEWLINE) {
+			return false; //wtf
+		} else if (tokenizer->get_token(1) == GDScriptTokenizer::TK_EOF) {
 			return false;
 		} else if (tokenizer->get_token(1) != GDScriptTokenizer::TK_NEWLINE) {
 			int indent = tokenizer->get_token_line_indent();
@@ -177,13 +141,14 @@ bool GDScriptParser::_parse_indent_block_newlines(BlockNode *p_block) {
 			indent_level.push_back(new_indent);
 			tokenizer->advance();
 			return true;
+
 		} else if (p_block) {
 			NewLineNode *nl = alloc_node<NewLineNode>();
 			nl->line = tokenizer->get_token_line();
 			p_block->statements.push_back(nl);
 		}
 
-		tokenizer->advance(); // Go to the next newline.
+		tokenizer->advance(); // go to next newline
 	}
 }
 
@@ -1127,14 +1092,15 @@ GDScriptParser::Node *GDScriptParser::_parse_expression(Node *p_parent, bool p_s
 						}
 						expecting = DICT_EXPECT_COMMA;
 
-						if (key->type == GDScriptParser::Node::TYPE_CONSTANT) {
-							Variant const &keyName = static_cast<const GDScriptParser::ConstantNode *>(key)->value;
-
-							if (keys.has(keyName)) {
-								_set_error("Duplicate key found in Dictionary literal");
+						const Variant *key_value = _try_to_find_constant_value_for_expression(key);
+						if (key_value) {
+							if (keys.has(*key_value)) {
+								_set_error("Duplicate key \"" + String(*key_value) + "\" found in Dictionary literal",
+										key->line,
+										key->column);
 								return nullptr;
 							}
-							keys.insert(keyName);
+							keys.insert(*key_value);
 						}
 
 						DictionaryNode::Pair pair;
@@ -2178,6 +2144,49 @@ bool GDScriptParser::_reduce_export_var_type(Variant &p_value, int p_line) {
 	}
 	_set_error("Invalid export type. Only built-in and native resource types can be exported.", p_line);
 	return false;
+}
+
+const Variant *GDScriptParser::_try_to_find_constant_value_for_expression(const Node *p_expr) const {
+	if (p_expr->type == Node::TYPE_CONSTANT) {
+		return &(static_cast<const ConstantNode *>(p_expr)->value);
+	} else if (p_expr->type == Node::TYPE_IDENTIFIER) {
+		const StringName &name = static_cast<const IdentifierNode *>(p_expr)->name;
+		const Map<StringName, ClassNode::Constant>::Element *element =
+				current_class->constant_expressions.find(name);
+		if (element) {
+			Node *cn_exp = element->value().expression;
+			if (cn_exp->type == Node::TYPE_CONSTANT) {
+				return &(static_cast<ConstantNode *>(cn_exp)->value);
+			}
+		}
+	} else if (p_expr->type == Node::TYPE_OPERATOR) {
+		// Check if expression `p_expr` is a named enum (e.g. `State.IDLE`).
+		const OperatorNode *op_node = static_cast<const OperatorNode *>(p_expr);
+		if (op_node->op == GDScriptParser::OperatorNode::OP_INDEX_NAMED) {
+			const Vector<Node *> &op_args = op_node->arguments;
+			if (op_args.size() < 2) {
+				return nullptr; // Invalid expression.
+			}
+
+			if (op_args[0]->type != Node::TYPE_IDENTIFIER || op_args[1]->type != Node::TYPE_IDENTIFIER) {
+				return nullptr; // Not an enum expression.
+			}
+
+			const StringName &enum_name = static_cast<const IdentifierNode *>(op_args[0])->name;
+			const StringName &const_name = static_cast<const IdentifierNode *>(op_args[1])->name;
+			Map<StringName, ClassNode::Constant>::Element *element =
+					current_class->constant_expressions.find(enum_name);
+			if (element) {
+				Node *cn_exp = element->value().expression;
+				if (cn_exp->type == Node::TYPE_CONSTANT) {
+					const Dictionary &enum_dict = static_cast<ConstantNode *>(cn_exp)->value;
+					return enum_dict.getptr(const_name);
+				}
+			}
+		}
+	}
+
+	return nullptr;
 }
 
 bool GDScriptParser::_recover_from_completion() {
@@ -3890,18 +3899,13 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 					}
 				}
 
-				if (!_enter_inner_class_indent_block()) {
-					if (!error_set) {
-						_set_error("Indented block or \"pass\" expected.");
-					}
+				if (!_enter_indent_block()) {
+					_set_error("Indented block expected.");
 					return;
 				}
-
-				if (tokenizer->get_token() != GDScriptTokenizer::TK_CF_PASS) {
-					current_class = newclass;
-					_parse_class(newclass);
-					current_class = p_class;
-				}
+				current_class = newclass;
+				_parse_class(newclass);
+				current_class = p_class;
 
 			} break;
 			/* this is for functions....

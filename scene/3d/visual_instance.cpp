@@ -74,10 +74,10 @@ void VisualInstance::set_instance_use_identity_transform(bool p_enable) {
 	if (is_inside_tree()) {
 		if (p_enable) {
 			// want to make sure instance is using identity transform
-			VisualServer::get_singleton()->instance_set_transform(instance, get_global_transform());
+			VisualServer::get_singleton()->instance_set_transform(instance, Transform());
 		} else {
 			// want to make sure instance is up to date
-			VisualServer::get_singleton()->instance_set_transform(instance, Transform());
+			VisualServer::get_singleton()->instance_set_transform(instance, get_global_transform());
 		}
 	}
 }
@@ -99,12 +99,11 @@ void VisualInstance::_notification(int p_what) {
 		case NOTIFICATION_TRANSFORM_CHANGED: {
 			if (_is_vi_visible() || is_physics_interpolated_and_enabled()) {
 				if (!_is_using_identity_transform()) {
-					Transform gt = get_global_transform();
-					VisualServer::get_singleton()->instance_set_transform(instance, gt);
+					VisualServer::get_singleton()->instance_set_transform(instance, get_global_transform());
 
 					// For instance when first adding to the tree, when the previous transform is
 					// unset, to prevent streaking from the origin.
-					if (_is_physics_interpolation_reset_requested()) {
+					if (_is_physics_interpolation_reset_requested() && is_physics_interpolated_and_enabled() && is_inside_tree()) {
 						if (_is_vi_visible()) {
 							_notification(NOTIFICATION_RESET_PHYSICS_INTERPOLATION);
 						}
@@ -114,7 +113,14 @@ void VisualInstance::_notification(int p_what) {
 			}
 		} break;
 		case NOTIFICATION_RESET_PHYSICS_INTERPOLATION: {
-			if (_is_vi_visible() && is_physics_interpolated()) {
+			if (_is_vi_visible() && is_physics_interpolated() && is_inside_tree()) {
+				// We must ensure the VisualServer transform is up to date before resetting.
+				// This is because NOTIFICATION_TRANSFORM_CHANGED is deferred,
+				// and cannot be relied to be called in order before NOTIFICATION_RESET_PHYSICS_INTERPOLATION.
+				if (!_is_using_identity_transform()) {
+					VisualServer::get_singleton()->instance_set_transform(instance, get_global_transform());
+				}
+
 				VisualServer::get_singleton()->instance_reset_physics_interpolation(instance);
 			}
 		} break;
@@ -266,42 +272,6 @@ GeometryInstance::LightmapScale GeometryInstance::get_lightmap_scale() const {
 	return lightmap_scale;
 }
 
-void GeometryInstance::set_lod_min_distance(float p_dist) {
-	lod_min_distance = p_dist;
-	VS::get_singleton()->instance_geometry_set_draw_range(get_instance(), lod_min_distance, lod_max_distance, lod_min_hysteresis, lod_max_hysteresis);
-}
-
-float GeometryInstance::get_lod_min_distance() const {
-	return lod_min_distance;
-}
-
-void GeometryInstance::set_lod_max_distance(float p_dist) {
-	lod_max_distance = p_dist;
-	VS::get_singleton()->instance_geometry_set_draw_range(get_instance(), lod_min_distance, lod_max_distance, lod_min_hysteresis, lod_max_hysteresis);
-}
-
-float GeometryInstance::get_lod_max_distance() const {
-	return lod_max_distance;
-}
-
-void GeometryInstance::set_lod_min_hysteresis(float p_dist) {
-	lod_min_hysteresis = p_dist;
-	VS::get_singleton()->instance_geometry_set_draw_range(get_instance(), lod_min_distance, lod_max_distance, lod_min_hysteresis, lod_max_hysteresis);
-}
-
-float GeometryInstance::get_lod_min_hysteresis() const {
-	return lod_min_hysteresis;
-}
-
-void GeometryInstance::set_lod_max_hysteresis(float p_dist) {
-	lod_max_hysteresis = p_dist;
-	VS::get_singleton()->instance_geometry_set_draw_range(get_instance(), lod_min_distance, lod_max_distance, lod_min_hysteresis, lod_max_hysteresis);
-}
-
-float GeometryInstance::get_lod_max_hysteresis() const {
-	return lod_max_hysteresis;
-}
-
 void GeometryInstance::_notification(int p_what) {
 }
 
@@ -367,18 +337,6 @@ void GeometryInstance::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_lightmap_scale", "scale"), &GeometryInstance::set_lightmap_scale);
 	ClassDB::bind_method(D_METHOD("get_lightmap_scale"), &GeometryInstance::get_lightmap_scale);
 
-	ClassDB::bind_method(D_METHOD("set_lod_max_hysteresis", "mode"), &GeometryInstance::set_lod_max_hysteresis);
-	ClassDB::bind_method(D_METHOD("get_lod_max_hysteresis"), &GeometryInstance::get_lod_max_hysteresis);
-
-	ClassDB::bind_method(D_METHOD("set_lod_max_distance", "mode"), &GeometryInstance::set_lod_max_distance);
-	ClassDB::bind_method(D_METHOD("get_lod_max_distance"), &GeometryInstance::get_lod_max_distance);
-
-	ClassDB::bind_method(D_METHOD("set_lod_min_hysteresis", "mode"), &GeometryInstance::set_lod_min_hysteresis);
-	ClassDB::bind_method(D_METHOD("get_lod_min_hysteresis"), &GeometryInstance::get_lod_min_hysteresis);
-
-	ClassDB::bind_method(D_METHOD("set_lod_min_distance", "mode"), &GeometryInstance::set_lod_min_distance);
-	ClassDB::bind_method(D_METHOD("get_lod_min_distance"), &GeometryInstance::get_lod_min_distance);
-
 	ClassDB::bind_method(D_METHOD("set_extra_cull_margin", "margin"), &GeometryInstance::set_extra_cull_margin);
 	ClassDB::bind_method(D_METHOD("get_extra_cull_margin"), &GeometryInstance::get_extra_cull_margin);
 
@@ -396,12 +354,6 @@ void GeometryInstance::_bind_methods() {
 	ADD_PROPERTYI(PropertyInfo(Variant::BOOL, "use_in_baked_light"), "set_flag", "get_flag", FLAG_USE_BAKED_LIGHT);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "generate_lightmap"), "set_generate_lightmap", "get_generate_lightmap");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "lightmap_scale", PROPERTY_HINT_ENUM, "1x,2x,4x,8x"), "set_lightmap_scale", "get_lightmap_scale");
-
-	ADD_GROUP("LOD", "lod_");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "lod_min_distance", PROPERTY_HINT_RANGE, "0,32768,0.01"), "set_lod_min_distance", "get_lod_min_distance");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "lod_min_hysteresis", PROPERTY_HINT_RANGE, "0,32768,0.01"), "set_lod_min_hysteresis", "get_lod_min_hysteresis");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "lod_max_distance", PROPERTY_HINT_RANGE, "0,32768,0.01"), "set_lod_max_distance", "get_lod_max_distance");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "lod_max_hysteresis", PROPERTY_HINT_RANGE, "0,32768,0.01"), "set_lod_max_hysteresis", "get_lod_max_hysteresis");
 
 	//ADD_SIGNAL( MethodInfo("visibility_changed"));
 
@@ -422,11 +374,6 @@ void GeometryInstance::_bind_methods() {
 }
 
 GeometryInstance::GeometryInstance() {
-	lod_min_distance = 0;
-	lod_max_distance = 0;
-	lod_min_hysteresis = 0;
-	lod_max_hysteresis = 0;
-
 	for (int i = 0; i < FLAG_MAX; i++) {
 		flags[i] = false;
 	}

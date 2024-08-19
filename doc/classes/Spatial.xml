@@ -24,6 +24,7 @@
 			<description>
 				When using physics interpolation, there will be circumstances in which you want to know the interpolated (displayed) transform of a node rather than the standard transform (which may only be accurate to the most recent physics tick).
 				This is particularly important for frame-based operations that take place in [method Node._process], rather than [method Node._physics_process]. Examples include [Camera]s focusing on a node, or finding where to fire lasers from on a frame rather than physics tick.
+				[b]Note:[/b] This function creates an interpolation pump on the [Spatial] the first time it is called, which can respond to physics interpolation resets. If you get problems with "streaking" when initially following a [Spatial], be sure to call [method get_global_transform_interpolated] at least once [i]before[/i] resetting the [Spatial] physics interpolation.
 			</description>
 		</method>
 		<method name="get_parent_spatial" qualifiers="const">
@@ -265,6 +266,10 @@
 		</member>
 		<member name="global_translation" type="Vector3" setter="set_global_translation" getter="get_global_translation">
 			Global position of this node. This is equivalent to [code]global_transform.origin[/code].
+		</member>
+		<member name="lod_range" type="float" setter="set_lod_range" getter="get_lod_range" default="10.0">
+			Determines the threshold distance at which this node will be shown or hidden when this node is parented by a [LOD] node.
+			For example, a first child with a range of [code]2[/code] will be shown from distance 0 to 2. A second child with a range of [code]5[/code] will be shown from distance 2 to 7, etc.
 		</member>
 		<member name="merging_mode" type="int" setter="set_merging_mode" getter="get_merging_mode" enum="Spatial.MergingMode" default="0">
 			The merging mode determines whether merging features of the engine ([MergeGroup] and [RoomManager]) will attempt to operate on branches of the scene tree.

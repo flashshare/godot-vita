@@ -243,7 +243,7 @@ public:
 		sfo->parental_level = p_preset->get("param_sfo/parental_level");
 
 		String icon = p_preset->get("assets/bubble_icon_128x128");
-		String splash = p_preset->get("assets/launch_splash_960x544");
+		String splash = p_preset->get("assets/app_splash_960x544");
 		String livearea_bg = p_preset->get("assets/livearea_bg_840x500");
 		String livearea_startup_button = p_preset->get("assets/livearea_startup_button_280x158");
 
@@ -324,7 +324,7 @@ public:
 			}
 		}
 
-		create_vpk(sfo->title + ".vpk", app_dir);
+		create_vpk(base_path + ".vpk", app_dir);
 		memdelete(sfo);
 		memdelete(da);
 		da = nullptr;

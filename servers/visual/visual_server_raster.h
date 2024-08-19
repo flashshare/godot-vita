@@ -507,8 +507,6 @@ public:
 	BIND4(camera_set_orthogonal, RID, float, float, float)
 	BIND5(camera_set_frustum, RID, float, Vector2, float, float)
 	BIND2(camera_set_transform, RID, const Transform &)
-	BIND2(camera_set_interpolated, RID, bool)
-	BIND1(camera_reset_physics_interpolation, RID)
 	BIND2(camera_set_cull_mask, RID, uint32_t)
 	BIND2(camera_set_environment, RID, RID)
 	BIND2(camera_set_use_vertical_aspect, RID, bool)
@@ -704,9 +702,6 @@ public:
 	BIND2(instance_geometry_set_material_override, RID, RID)
 	BIND2(instance_geometry_set_material_overlay, RID, RID)
 
-	BIND5(instance_geometry_set_draw_range, RID, float, float, float, float)
-	BIND2(instance_geometry_set_as_instance_lod, RID, RID)
-
 #undef BINDBASE
 //from now on, calls forwarded to this singleton
 #define BINDBASE VSG::canvas
@@ -771,7 +766,7 @@ public:
 
 	BIND2(canvas_item_set_interpolated, RID, bool)
 	BIND1(canvas_item_reset_physics_interpolation, RID)
-	BIND2(canvas_item_transform_physics_interpolation, RID, Transform2D)
+	BIND2(canvas_item_transform_physics_interpolation, RID, const Transform2D &)
 
 	BIND0R(RID, canvas_light_create)
 	BIND2(canvas_light_attach_to_canvas, RID, RID)
@@ -799,7 +794,7 @@ public:
 
 	BIND2(canvas_light_set_interpolated, RID, bool)
 	BIND1(canvas_light_reset_physics_interpolation, RID)
-	BIND2(canvas_light_transform_physics_interpolation, RID, Transform2D)
+	BIND2(canvas_light_transform_physics_interpolation, RID, const Transform2D &)
 
 	BIND0R(RID, canvas_light_occluder_create)
 	BIND2(canvas_light_occluder_attach_to_canvas, RID, RID)
@@ -810,7 +805,7 @@ public:
 
 	BIND2(canvas_light_occluder_set_interpolated, RID, bool)
 	BIND1(canvas_light_occluder_reset_physics_interpolation, RID)
-	BIND2(canvas_light_occluder_transform_physics_interpolation, RID, Transform2D)
+	BIND2(canvas_light_occluder_transform_physics_interpolation, RID, const Transform2D &)
 
 	BIND0R(RID, canvas_occluder_polygon_create)
 	BIND3(canvas_occluder_polygon_set_shape, RID, const PoolVector<Vector2> &, bool)

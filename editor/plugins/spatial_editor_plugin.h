@@ -184,6 +184,10 @@ class SpatialEditorViewport : public Control {
 	friend class SpatialEditor;
 	friend class ViewportNavigationControl;
 	friend class ViewportRotationControl;
+
+	// These values are serialized, so if adding new values
+	// add to the bottom to preserve compatibility between
+	// editor versions.
 	enum {
 
 		VIEW_TOP,
@@ -213,6 +217,7 @@ class SpatialEditorViewport : public Control {
 		VIEW_CINEMATIC_PREVIEW,
 		VIEW_AUTO_ORTHOGONAL,
 		VIEW_PORTAL_CULLING,
+		VIEW_SELECTED_INFO,
 	};
 
 	enum ViewType {
@@ -283,6 +288,7 @@ private:
 	Vector2 previous_mouse_position;
 
 	Label *info_label;
+	Label *selected_info_label;
 	Label *cinema_label;
 	Label *locked_label;
 	Label *zoom_limit_label;
@@ -637,9 +643,8 @@ private:
 	RID indicators_instance;
 	RID cursor_mesh;
 	RID cursor_instance;
-	Ref<Material3D> indicator_mat;
+	Ref<SpatialMaterial> indicator_mat;
 	Ref<ShaderMaterial> grid_mat[3];
-	Ref<Material3D> cursor_material;
 
 	// Scene drag and drop support
 	Spatial *preview_node;
@@ -674,6 +679,7 @@ private:
 		MENU_VIEW_GRID,
 		MENU_VIEW_PORTAL_CULLING,
 		MENU_VIEW_OCCLUSION_CULLING,
+		MENU_VIEW_LEVEL_OF_DETAIL,
 		MENU_VIEW_GIZMOS_3D_ICONS,
 		MENU_VIEW_CAMERA_SETTINGS,
 		MENU_LOCK_SELECTED,

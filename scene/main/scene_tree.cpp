@@ -555,7 +555,15 @@ void SceneTree::client_physics_interpolation_remove_spatial(SelfList<Spatial> *p
 
 void SceneTree::iteration_prepare() {
 	if (_physics_interpolation_enabled) {
+		// Make sure any pending transforms from the last tick / frame
+		// are flushed before pumping the interpolation prev and currents.
+		flush_transform_notifications();
 		VisualServer::get_singleton()->tick();
+
+		// Any objects performing client physics interpolation
+		// should be given an opportunity to keep their previous transforms
+		// up to date before each new physics tick.
+		_client_physics_interpolation.physics_process();
 	}
 }
 
@@ -572,14 +580,11 @@ bool SceneTree::iteration(float p_time) {
 
 	current_frame++;
 
-	// Any objects performing client physics interpolation
-	// should be given an opportunity to keep their previous transforms
-	// up to take before each new physics tick.
-	_client_physics_interpolation.physics_process();
-
 	flush_transform_notifications();
 
-	MainLoop::iteration(p_time);
+	if (MainLoop::iteration(p_time)) {
+		_quit = true;
+	}
 	physics_process_time = p_time;
 
 	emit_signal("physics_frame");
@@ -620,7 +625,9 @@ bool SceneTree::idle(float p_time) {
 
 	root_lock++;
 
-	MainLoop::idle(p_time);
+	if (MainLoop::idle(p_time)) {
+		_quit = true;
+	}
 
 	idle_process_time = p_time;
 
