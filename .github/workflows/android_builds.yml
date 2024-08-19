@@ -1,12 +1,11 @@
 name: 🤖 Android Builds
-on:
-  workflow_call:
+on: [push, pull_request]
 
 # Global Settings
 env:
   # Only used for the cache key. Increment version to force clean build.
   GODOT_BASE_BRANCH: 3.x
-  SCONSFLAGS: verbose=yes warnings=all werror=yes debug_symbols=no
+  SCONSFLAGS: verbose=no warnings=no werror=no debug_symbols=no
 
 concurrency:
   group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-android
@@ -39,6 +38,11 @@ jobs:
 
       - name: Setup python and scons
         uses: ./.github/actions/godot-deps
+
+      # Platform specific flags to convert from no-rtti (default by Godot) to rtti for android compile (required by DragonBones)
+      - name: specific flags from no-rtti to rtti
+        shell: sh    
+        run: git apply ./modules/godot_dragonbones/build/android-no-rtti-patch.patch
 
       - name: Compilation (armv7)
         uses: ./.github/actions/godot-build

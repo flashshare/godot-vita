@@ -1,11 +1,10 @@
 name: 🎮 PSVita Builds
-on:
-  workflow_call:
+on: [push, pull_request]
 
 # Global Settings
 env:
   GODOT_BASE_BRANCH: 3.x
-  SCONSFLAGS: verbose=yes warnings=all werror=no debug_symbols=no
+  SCONSFLAGS: verbose=no warnings=no werror=no debug_symbols=no
   VITASDK: /usr/local/vitasdk
   EUID: 1 makepkg
 
@@ -19,7 +18,7 @@ jobs:
     name: Template (target=release, tools=no)
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       # Azure repositories are not reliable, we need to prevent azure giving us packages.
       - name: Make apt sources.list use the default Ubuntu repositories
