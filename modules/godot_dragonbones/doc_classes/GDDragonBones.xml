@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="GDDragonBones" inherits="GDOwnerNode" version="3.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="GDDragonBones" inherits="GDOwnerNode" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
 	</brief_description>
 	<description>
@@ -30,44 +30,47 @@
 			<argument index="4" name="group" type="String" />
 			<argument index="5" name="fade_out_mode" type="int" enum="GDArmatureDisplay.AnimFadeOutMode" />
 			<description>
+				Set fade in mode for animation_name with time and loop for layer and group
 			</description>
 		</method>
 		<method name="fade_out">
 			<return type="void" />
 			<argument index="0" name="anim_name" type="String" />
 			<description>
+				Set fade out for animation name
 			</description>
 		</method>
 		<method name="get_armature">
 			<return type="GDArmatureDisplay" />
 			<description>
+				Get armature Display object
 			</description>
 		</method>
-		<method name="get_current_animation" qualifiers="const">
+		<method name="get_current_animation">
 			<return type="String" />
 			<description>
 				Get the most recently set animation. (current animation if only 1 layer playing).
 			</description>
 		</method>
-		<method name="get_current_animation_on_layer" qualifiers="const">
+		<method name="get_current_animation_on_layer">
 			<return type="String" />
 			<argument index="0" name="layer_number" type="int" />
 			<description>
-				Get the animation playing on the requested layer.
+				Get the animation playing on the requested layer (layer_number).
 			</description>
 		</method>
 		<method name="get_slot_display_color_multiplier">
 			<return type="Color" />
 			<argument index="0" name="slot_name" type="String" />
 			<description>
-				Get the current color multiplier applied to the slot.
+				Get the current color multiplier applied to the slot (slot_name).
 			</description>
 		</method>
 		<method name="get_slot_display_index">
 			<return type="int" />
 			<argument index="0" name="slot_name" type="String" />
 			<description>
-				Get the slot's current display index. 
+				Get the slot's current display index from slot_name. 
 			</description>
 		</method>
 		<method name="get_total_items_in_slot">
@@ -84,13 +87,14 @@
 				Does the animation exist
 			</description>
 		</method>
-		<method name="has_slot" qualifiers="const">
+		<method name="has_slot">
 			<return type="bool" />
 			<argument index="0" name="slot_name" type="String" />
 			<description>
+				Check if having slot_name
 			</description>
 		</method>
-		<method name="is_active" qualifiers="const">
+		<method name="is_active">
 			<return type="bool" />
 			<description>
 			</description>
@@ -106,12 +110,14 @@
 			<return type="void" />
 			<argument index="0" name="progress" type="float" />
 			<description>
+				Play this animation from process for GD Bones
 			</description>
 		</method>
 		<method name="play_from_time">
 			<return type="void" />
 			<argument index="0" name="time" type="float" />
 			<description>
+				Play this animation from time
 			</description>
 		</method>
 		<method name="play_new_animation">
@@ -119,7 +125,7 @@
 			<argument index="0" name="animation_name" type="String" />
 			<argument index="1" name="loop_count" type="int" />
 			<description>
-				Force play specified animation from start. Will destroy blend settings.
+				Force play specified animation (animation_name) from start with loop_count. Will destroy blend settings.
 			</description>
 		</method>
 		<method name="play_new_animation_from_progress">
@@ -137,17 +143,20 @@
 			<argument index="1" name="loop_count" type="int" />
 			<argument index="2" name="time" type="float" />
 			<description>
+				Play a new animation from time with loop option
 			</description>
 		</method>
 		<method name="reset">
 			<return type="void" />
 			<description>
+				Reset the animation
 			</description>
 		</method>
 		<method name="set_active">
 			<return type="void" />
 			<argument index="0" name="active" type="bool" />
 			<description>
+				Active the animation mode
 			</description>
 		</method>
 		<method name="set_all_slots_by_item_name">
@@ -191,11 +200,13 @@
 		<method name="stop_all">
 			<return type="void" />
 			<description>
+				Stop all animation
 			</description>
 		</method>
 		<method name="tell">
 			<return type="float" />
 			<description>
+				Tell the animation
 			</description>
 		</method>
 	</methods>
@@ -225,47 +236,56 @@
 		<signal name="dragon_anim_complete">
 			<argument index="0" name="anim" type="String" />
 			<description>
+				Return animation complete
 			</description>
 		</signal>
 		<signal name="dragon_anim_event">
 			<argument index="0" name="event" type="Dictionary" />
 			<description>
+				Return animation event
 			</description>
 		</signal>
 		<signal name="dragon_anim_loop_complete">
 			<argument index="0" name="anim" type="String" />
 			<description>
+				Return the loop is complete
 			</description>
 		</signal>
 		<signal name="dragon_anim_snd_event">
 			<argument index="0" name="anim" type="String" />
 			<argument index="1" name="ev" type="String" />
 			<description>
+				Animation and event
 			</description>
 		</signal>
 		<signal name="dragon_anim_start">
 			<argument index="0" name="anim" type="String" />
 			<description>
+				Animation starts or not
 			</description>
 		</signal>
 		<signal name="dragon_fade_in">
 			<argument index="0" name="anim" type="String" />
 			<description>
+				Start fade in or not
 			</description>
 		</signal>
 		<signal name="dragon_fade_in_complete">
 			<argument index="0" name="anim" type="String" />
 			<description>
+				Fade in complete or not
 			</description>
 		</signal>
 		<signal name="dragon_fade_out">
 			<argument index="0" name="anim" type="String" />
 			<description>
+				Fade out or not
 			</description>
 		</signal>
 		<signal name="dragon_fade_out_complete">
 			<argument index="0" name="anim" type="String" />
 			<description>
+				Fade out complete
 			</description>
 		</signal>
 	</signals>

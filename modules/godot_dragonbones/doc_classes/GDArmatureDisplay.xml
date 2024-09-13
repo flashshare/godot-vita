@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="GDArmatureDisplay" inherits="GDDisplay" version="3.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../class.xsd">
+<class name="GDArmatureDisplay" inherits="GDDisplay" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../class.xsd">
 	<brief_description>
 	</brief_description>
 	<description>
@@ -9,82 +9,96 @@
 	<methods>
 		<method name="fade_in">
 			<return type="void" />
-			<argument index="0" name="arg0" type="String" />
-			<argument index="1" name="arg1" type="float" />
-			<argument index="2" name="arg2" type="int" />
-			<argument index="3" name="arg3" type="int" />
-			<argument index="4" name="arg4" type="String" />
-			<argument index="5" name="arg5" type="int" enum="GDArmatureDisplay.AnimFadeOutMode" />
+			<argument index="0" name="animation_name" type="String" />
+			<argument index="1" name="time" type="float" />
+			<argument index="2" name="loop" type="int" />
+			<argument index="3" name="layer" type="int" />
+			<argument index="4" name="group" type="String" />
+			<argument index="5" name="fade_out_mode" type="int" enum="GDArmatureDisplay.AnimFadeOutMode" />
 			<description>
+				Fade in and fade out for animation_name with time and loop option for layer and group
 			</description>
 		</method>
 		<method name="freeze">
 			<return type="void" />
 			<description>
+				Freeze the animation
 			</description>
 		</method>
 		<method name="get_animations">
 			<return type="Array" />
 			<description>
+				Return the animation list
 			</description>
 		</method>
 		<method name="get_bone">
 			<return type="GDBone2D" />
 			<argument index="0" name="bone_name" type="String" />
 			<description>
+				Get GDBone2 object
 			</description>
 		</method>
 		<method name="get_bones">
 			<return type="Dictionary" />
 			<description>
+				Get dictionary of Bones
 			</description>
 		</method>
 		<method name="get_ik_constraints">
 			<return type="Dictionary" />
 			<description>
+				Get dictionary of IK constraints
 			</description>
 		</method>
 		<method name="get_slot">
 			<return type="GDSlot" />
 			<argument index="0" name="slot_name" type="String" />
 			<description>
+				Get one GD slot object
 			</description>
 		</method>
 		<method name="get_slots">
 			<return type="Dictionary" />
 			<description>
+				Get dictionary of Gd slots
 			</description>
 		</method>
 		<method name="has_animation">
 			<return type="bool" />
 			<argument index="0" name="animation_name" type="String" />
 			<description>
+				Check if having this animation_name
 			</description>
 		</method>
 		<method name="has_slot" qualifiers="const">
 			<return type="bool" />
 			<argument index="0" name="slot_name" type="String" />
 			<description>
+				Check if has this slot_name
 			</description>
 		</method>
 		<method name="is_flipped_x" qualifiers="const">
 			<return type="bool" />
 			<description>
+				Check if x is flipped
 			</description>
 		</method>
 		<method name="is_flipped_y" qualifiers="const">
 			<return type="bool" />
 			<description>
+				Check if y is flipped
 			</description>
 		</method>
 		<method name="is_frozen">
 			<return type="bool" />
 			<description>
+				Check if is_frozen
 			</description>
 		</method>
 		<method name="is_playing" qualifiers="const">
 			<return type="bool" />
 			<description>
+				Check if is playing
 			</description>
 		</method>
 		<method name="play">
@@ -92,6 +106,7 @@
 			<argument index="0" name="animation_name" type="String" />
 			<argument index="1" name="loop_count" type="int" />
 			<description>
+				Play loop_count for the animation_name
 			</description>
 		</method>
 		<method name="play_from_progress">
@@ -100,6 +115,7 @@
 			<argument index="1" name="f_progress" type="float" />
 			<argument index="2" name="loop_count" type="int" />
 			<description>
+				Play animation_name from process with loop_count for GD Display
 			</description>
 		</method>
 		<method name="play_from_time">
@@ -108,29 +124,34 @@
 			<argument index="1" name="f_time" type="float" />
 			<argument index="2" name="loop_count" type="int" />
 			<description>
+				Play animation_name from time with loop_count
 			</description>
 		</method>
 		<method name="reset">
 			<return type="void" />
 			<description>
+				Reset the animation
 			</description>
 		</method>
 		<method name="set_debug">
 			<return type="void" />
 			<argument index="0" name="is_debug" type="bool" />
 			<description>
+				Show debug animation
 			</description>
 		</method>
 		<method name="set_flip_x">
 			<return type="void" />
 			<argument index="0" name="is_flipped" type="bool" />
 			<description>
+				Set flip_x
 			</description>
 		</method>
 		<method name="set_flip_y">
 			<return type="void" />
 			<argument index="0" name="is_flipped" type="bool" />
 			<description>
+				Set flip_y
 			</description>
 		</method>
 		<method name="set_ik_constraint">
@@ -138,6 +159,7 @@
 			<argument index="0" name="constraint_name" type="String" />
 			<argument index="1" name="new_position" type="Vector2" />
 			<description>
+				Set IK constraint
 			</description>
 		</method>
 		<method name="set_ik_constraint_bend_positive">
@@ -145,6 +167,7 @@
 			<argument index="0" name="constraint_name" type="String" />
 			<argument index="1" name="is_positive" type="bool" />
 			<description>
+				Set IK constraint bend
 			</description>
 		</method>
 		<method name="stop">
@@ -152,18 +175,21 @@
 			<argument index="0" name="animation_name" type="String" />
 			<argument index="1" name="b_reset" type="bool" />
 			<description>
+				Force stop animation_name with reset option
 			</description>
 		</method>
 		<method name="stop_all_animations">
 			<return type="void" />
-			<argument index="0" name="b_reset" type="bool" />
-			<argument index="1" name="arg1" type="bool" />
+			<argument index="0" name="b_children" type="bool" />
+			<argument index="1" name="b_reset" type="bool" />
 			<description>
+				Stop all animation with option for b_children and b_reset
 			</description>
 		</method>
 		<method name="thaw">
 			<return type="void" />
 			<description>
+				Become liquid
 			</description>
 		</method>
 	</methods>
