@@ -89,11 +89,12 @@ class StringName {
 	StringName(_Data *p_data) { _data = p_data; }
 
 public:
-	operator const void *() const { return (_data && (_data->cname || !_data->name.empty())) ? (void *)1 : nullptr; }
+	operator const void *() const { return (_data && (_data->cname || !_data->name.is_empty())) ? (void *)1 : nullptr; }
 
 	bool operator==(const String &p_name) const;
 	bool operator==(const char *p_name) const;
 	bool operator!=(const String &p_name) const;
+	bool is_empty() const;
 
 	_FORCE_INLINE_ bool is_node_unique_name() const {
 		if (!_data) {
