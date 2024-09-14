@@ -115,12 +115,12 @@ bool StringName::operator==(const String &p_name) const {
 	return (_data->get_name() == p_name);
 }
 
-bool StringName::is_empty() const {
+bool StringName::empty() const {
 	if (_data) {
 		if (_data->cname) {
 			return _data->cname[0] == 0;
 		} else {
-			return _data->name.is_empty();
+			return _data->name.empty();
 		}
 	}
 
