@@ -18,32 +18,33 @@ GDArmatureDisplay::~GDArmatureDisplay()
 }
 
 void GDArmatureDisplay::_bind_methods() {
-	CLASS_BIND_GODO::bind_method(METH("is_frozen"), &GDArmatureDisplay::is_frozen);
-	CLASS_BIND_GODO::bind_method(METH("freeze"), &GDArmatureDisplay::freeze);
-	CLASS_BIND_GODO::bind_method(METH("thaw"), &GDArmatureDisplay::thaw);
-	CLASS_BIND_GODO::bind_method(METH("has_animation", "animation_name"), &GDArmatureDisplay::has_animation);
-	CLASS_BIND_GODO::bind_method(METH("get_animations"), &GDArmatureDisplay::get_animations);
-	CLASS_BIND_GODO::bind_method(METH("is_playing"), &GDArmatureDisplay::is_playing);
-	CLASS_BIND_GODO::bind_method(METH("play", "animation_name", "loop_count"), &GDArmatureDisplay::play);
-	CLASS_BIND_GODO::bind_method(METH("play_from_time", "animation_name", "f_time", "loop_count"), &GDArmatureDisplay::play_from_time);
-	CLASS_BIND_GODO::bind_method(METH("play_from_progress", "animation_name", "f_progress", "loop_count"), &GDArmatureDisplay::play_from_progress);
-	CLASS_BIND_GODO::bind_method(METH("stop", "animation_name", "b_reset"), &GDArmatureDisplay::stop);
-	CLASS_BIND_GODO::bind_method(METH("stop_all_animations", "b_reset"), &GDArmatureDisplay::stop_all_animations);
-	CLASS_BIND_GODO::bind_method(METH("fade_in"), &GDArmatureDisplay::fade_in);
-	CLASS_BIND_GODO::bind_method(METH("has_slot", "slot_name"), &GDArmatureDisplay::has_slot);
-	CLASS_BIND_GODO::bind_method(METH("get_slot", "slot_name"), &GDArmatureDisplay::get_slot);
-	CLASS_BIND_GODO::bind_method(METH("get_slots"), &GDArmatureDisplay::get_slots);
-	CLASS_BIND_GODO::bind_method(METH("reset"), &GDArmatureDisplay::reset);
-	CLASS_BIND_GODO::bind_method(METH("set_flip_x", "is_flipped"), &GDArmatureDisplay::flip_x);
-	CLASS_BIND_GODO::bind_method(METH("is_flipped_x"), &GDArmatureDisplay::is_flipped_x);
-	CLASS_BIND_GODO::bind_method(METH("set_flip_y" , "is_flipped"), &GDArmatureDisplay::flip_y);
-	CLASS_BIND_GODO::bind_method(METH("is_flipped_y"), &GDArmatureDisplay::is_flipped_y);
-	CLASS_BIND_GODO::bind_method(METH("set_debug", "is_debug"), &GDArmatureDisplay::set_debug);
-	CLASS_BIND_GODO::bind_method(METH("get_ik_constraints"), &GDArmatureDisplay::get_ik_constraints);
-	CLASS_BIND_GODO::bind_method(METH("set_ik_constraint", "constraint_name", "new_position"), &GDArmatureDisplay::set_ik_constraint);
-	CLASS_BIND_GODO::bind_method(METH("set_ik_constraint_bend_positive", "constraint_name", "is_positive"), &GDArmatureDisplay::set_ik_constraint_bend_positive);
-	CLASS_BIND_GODO::bind_method(METH("get_bones"), &GDArmatureDisplay::get_bones);
-	CLASS_BIND_GODO::bind_method(METH("get_bone", "bone_name"), &GDArmatureDisplay::get_bone);
+	ClassDB::bind_method(D_METHOD("is_frozen"), &GDArmatureDisplay::is_frozen);
+	ClassDB::bind_method(D_METHOD("freeze"), &GDArmatureDisplay::freeze);
+	ClassDB::bind_method(D_METHOD("thaw"), &GDArmatureDisplay::thaw);
+	ClassDB::bind_method(D_METHOD("has_animation", "animation_name"), &GDArmatureDisplay::has_animation);
+	ClassDB::bind_method(D_METHOD("get_animations"), &GDArmatureDisplay::get_animations);
+	ClassDB::bind_method(D_METHOD("is_playing"), &GDArmatureDisplay::is_playing);
+	ClassDB::bind_method(D_METHOD("play", "animation_name", "loop_count"), &GDArmatureDisplay::play);
+	ClassDB::bind_method(D_METHOD("play_from_time", "animation_name", "f_time", "loop_count"), &GDArmatureDisplay::play_from_time);
+	ClassDB::bind_method(D_METHOD("play_from_progress", "animation_name", "f_progress", "loop_count"), &GDArmatureDisplay::play_from_progress);
+	ClassDB::bind_method(D_METHOD("stop", "animation_name", "b_reset"), &GDArmatureDisplay::stop);
+	ClassDB::bind_method(D_METHOD("stop_all_animations", "b_reset"), &GDArmatureDisplay::stop_all_animations);
+	ClassDB::bind_method(D_METHOD("fade_in","_animation_name", "_time",
+			"_loop", "_layer", "_group", "fade_out_mode"), &GDArmatureDisplay::fade_in);
+	ClassDB::bind_method(D_METHOD("has_slot", "slot_name"), &GDArmatureDisplay::has_slot);
+	ClassDB::bind_method(D_METHOD("get_slot", "slot_name"), &GDArmatureDisplay::get_slot);
+	ClassDB::bind_method(D_METHOD("get_slots"), &GDArmatureDisplay::get_slots);
+	ClassDB::bind_method(D_METHOD("reset"), &GDArmatureDisplay::reset);
+	ClassDB::bind_method(D_METHOD("set_flip_x", "is_flipped"), &GDArmatureDisplay::flip_x);
+	ClassDB::bind_method(D_METHOD("is_flipped_x"), &GDArmatureDisplay::is_flipped_x);
+	ClassDB::bind_method(D_METHOD("set_flip_y" , "is_flipped"), &GDArmatureDisplay::flip_y);
+	ClassDB::bind_method(D_METHOD("is_flipped_y"), &GDArmatureDisplay::is_flipped_y);
+	ClassDB::bind_method(D_METHOD("set_debug", "is_debug"), &GDArmatureDisplay::set_debug);
+	ClassDB::bind_method(D_METHOD("get_ik_constraints"), &GDArmatureDisplay::get_ik_constraints);
+	ClassDB::bind_method(D_METHOD("set_ik_constraint", "constraint_name", "new_position"), &GDArmatureDisplay::set_ik_constraint);
+	ClassDB::bind_method(D_METHOD("set_ik_constraint_bend_positive", "constraint_name", "is_positive"), &GDArmatureDisplay::set_ik_constraint_bend_positive);
+	ClassDB::bind_method(D_METHOD("get_bones"), &GDArmatureDisplay::get_bones);
+	ClassDB::bind_method(D_METHOD("get_bone", "bone_name"), &GDArmatureDisplay::get_bone);
 
 
 	// Enum

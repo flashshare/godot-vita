@@ -1,23 +1,23 @@
 #include "GDBone2D.h"
 
 void GDBone2D::_bind_methods() {
-	CLASS_BIND_GODO::bind_method(METH("get_bone_name"), &GDBone2D::get_bone_name);
-	CLASS_BIND_GODO::bind_method(METH("get_bone_position"), &GDBone2D::get_bone_position);
-	CLASS_BIND_GODO::bind_method(METH("set_bone_position", "new_position"), &GDBone2D::set_bone_position);
-	CLASS_BIND_GODO::bind_method(METH("set_bone_global_position", "new_position"), &GDBone2D::set_bone_global_position);
-	CLASS_BIND_GODO::bind_method(METH("get_bone_scale"), &GDBone2D::get_bone_scale);
-	CLASS_BIND_GODO::bind_method(METH("set_bone_scale", "new_scale"), &GDBone2D::set_bone_scale);
-	CLASS_BIND_GODO::bind_method(METH("set_bone_global_scale", "new_scale"), &GDBone2D::set_bone_global_scale);
-	CLASS_BIND_GODO::bind_method(METH("get_bone_rotation"), &GDBone2D::get_bone_rotation);
-	CLASS_BIND_GODO::bind_method(METH("set_bone_rotation", "deg_in_rad"), &GDBone2D::set_bone_rotation);
-	CLASS_BIND_GODO::bind_method(METH("set_bone_global_rotation", "deg_in_rad"), &GDBone2D::set_bone_global_rotation);
-	CLASS_BIND_GODO::bind_method(METH("get_bone_global_position"), &GDBone2D::get_bone_global_position);
-	CLASS_BIND_GODO::bind_method(METH("get_bone_global_rotation"), &GDBone2D::get_bone_global_rotation);
-	CLASS_BIND_GODO::bind_method(METH("get_bone_global_scale"), &GDBone2D::get_bone_global_scale);
-	CLASS_BIND_GODO::bind_method(METH("get_bone_offset_position"), &GDBone2D::get_bone_offset_position);
-	CLASS_BIND_GODO::bind_method(METH("get_bone_animation_position"), &GDBone2D::get_bone_animation_position);
-	CLASS_BIND_GODO::bind_method(METH("get_bone_origin_position"), &GDBone2D::get_bone_origin_position);
-	CLASS_BIND_GODO::bind_method(METH("has_data"), &GDBone2D::has_data);
+	ClassDB::bind_method(D_METHOD("get_bone_name"), &GDBone2D::get_bone_name);
+	ClassDB::bind_method(D_METHOD("get_bone_position"), &GDBone2D::get_bone_position);
+	ClassDB::bind_method(D_METHOD("set_bone_position", "new_position"), &GDBone2D::set_bone_position);
+	ClassDB::bind_method(D_METHOD("set_bone_global_position", "new_position"), &GDBone2D::set_bone_global_position);
+	ClassDB::bind_method(D_METHOD("get_bone_scale"), &GDBone2D::get_bone_scale);
+	ClassDB::bind_method(D_METHOD("set_bone_scale", "new_scale"), &GDBone2D::set_bone_scale);
+	ClassDB::bind_method(D_METHOD("set_bone_global_scale", "new_scale"), &GDBone2D::set_bone_global_scale);
+	ClassDB::bind_method(D_METHOD("get_bone_rotation"), &GDBone2D::get_bone_rotation);
+	ClassDB::bind_method(D_METHOD("set_bone_rotation", "deg_in_rad"), &GDBone2D::set_bone_rotation);
+	ClassDB::bind_method(D_METHOD("set_bone_global_rotation", "deg_in_rad"), &GDBone2D::set_bone_global_rotation);
+	ClassDB::bind_method(D_METHOD("get_bone_global_position"), &GDBone2D::get_bone_global_position);
+	ClassDB::bind_method(D_METHOD("get_bone_global_rotation"), &GDBone2D::get_bone_global_rotation);
+	ClassDB::bind_method(D_METHOD("get_bone_global_scale"), &GDBone2D::get_bone_global_scale);
+	ClassDB::bind_method(D_METHOD("get_bone_offset_position"), &GDBone2D::get_bone_offset_position);
+	ClassDB::bind_method(D_METHOD("get_bone_animation_position"), &GDBone2D::get_bone_animation_position);
+	ClassDB::bind_method(D_METHOD("get_bone_origin_position"), &GDBone2D::get_bone_origin_position);
+	ClassDB::bind_method(D_METHOD("has_data"), &GDBone2D::has_data);
 }
 
 Vector2 GDBone2D::get_bone_global_position(){
