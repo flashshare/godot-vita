@@ -180,8 +180,8 @@
 		</method>
 		<method name="stop_all_animations">
 			<return type="void" />
-			<argument index="0" name="b_reset" type="bool" />
-			<argument index="1" name="_arg1" type="bool" />
+			<argument index="0" name="b_children" type="bool" />
+			<argument index="1" name="b_reset" type="bool" />
 			<description>
 				Stop all animation with option for b_children and b_reset
 			</description>

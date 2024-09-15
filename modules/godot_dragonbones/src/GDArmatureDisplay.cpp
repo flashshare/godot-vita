@@ -28,7 +28,7 @@ void GDArmatureDisplay::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("play_from_time", "animation_name", "f_time", "loop_count"), &GDArmatureDisplay::play_from_time);
 	ClassDB::bind_method(D_METHOD("play_from_progress", "animation_name", "f_progress", "loop_count"), &GDArmatureDisplay::play_from_progress);
 	ClassDB::bind_method(D_METHOD("stop", "animation_name", "b_reset"), &GDArmatureDisplay::stop);
-	ClassDB::bind_method(D_METHOD("stop_all_animations", "b_reset"), &GDArmatureDisplay::stop_all_animations);
+	ClassDB::bind_method(D_METHOD("stop_all_animations", "b_children","b_reset"), &GDArmatureDisplay::stop_all_animations);
 	ClassDB::bind_method(D_METHOD("fade_in","_animation_name", "_time",
 			"_loop", "_layer", "_group", "fade_out_mode"), &GDArmatureDisplay::fade_in);
 	ClassDB::bind_method(D_METHOD("has_slot", "slot_name"), &GDArmatureDisplay::has_slot);
