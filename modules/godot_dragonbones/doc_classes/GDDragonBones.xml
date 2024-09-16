@@ -75,7 +75,7 @@
 		</method>
 		<method name="get_total_items_in_slot">
 			<return type="int" />
-			<argument index="0" name="get_total_items_in_slot" type="String" />
+			<argument index="0" name="_slot_name" type="String" />
 			<description>
 				Get the total number of items in the slot.
 			</description>
