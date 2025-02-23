@@ -454,16 +454,16 @@ void GDSlot::set_slot(Slot_GD *_slot) {
 
 /* GODOT CLASS WRAPPER FOR GIVING SCRIPT ACCESS */
 void GDSlot::_bind_methods() {
-	CLASS_BIND_GODO::bind_method(METH("get_display_color_multiplier"), &GDSlot::get_display_color_multiplier);
-	CLASS_BIND_GODO::bind_method(METH("set_display_color_multiplier", "color"), &GDSlot::set_display_color_multiplier);
-	CLASS_BIND_GODO::bind_method(METH("set_display_index", "index"), &GDSlot::set_display_index);
-	CLASS_BIND_GODO::bind_method(METH("set_display_by_name", "name"), &GDSlot::set_display_by_name);
-	CLASS_BIND_GODO::bind_method(METH("get_display_index"), &GDSlot::get_display_index);
-	CLASS_BIND_GODO::bind_method(METH("get_display_count"), &GDSlot::get_display_count);
-	CLASS_BIND_GODO::bind_method(METH("next_display"), &GDSlot::next_display);
-	CLASS_BIND_GODO::bind_method(METH("previous_display"), &GDSlot::previous_display);
-	CLASS_BIND_GODO::bind_method(METH("get_child_armature"), &GDSlot::get_child_armature);
-	CLASS_BIND_GODO::bind_method(METH("get_slot_name"), &GDSlot::get_slot_name);
+	ClassDB::bind_method(D_METHOD("get_display_color_multiplier"), &GDSlot::get_display_color_multiplier);
+	ClassDB::bind_method(D_METHOD("set_display_color_multiplier", "color"), &GDSlot::set_display_color_multiplier);
+	ClassDB::bind_method(D_METHOD("set_display_index", "index"), &GDSlot::set_display_index);
+	ClassDB::bind_method(D_METHOD("set_display_by_name", "name"), &GDSlot::set_display_by_name);
+	ClassDB::bind_method(D_METHOD("get_display_index"), &GDSlot::get_display_index);
+	ClassDB::bind_method(D_METHOD("get_display_count"), &GDSlot::get_display_count);
+	ClassDB::bind_method(D_METHOD("next_display"), &GDSlot::next_display);
+	ClassDB::bind_method(D_METHOD("previous_display"), &GDSlot::previous_display);
+	ClassDB::bind_method(D_METHOD("get_child_armature"), &GDSlot::get_child_armature);
+	ClassDB::bind_method(D_METHOD("get_slot_name"), &GDSlot::get_slot_name);
 }
 
 Color GDSlot::get_display_color_multiplier() {
