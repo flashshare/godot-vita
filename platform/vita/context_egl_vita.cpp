@@ -30,6 +30,12 @@
 
 #include "context_egl_vita.h"
 
+#ifdef VITAGL
+#define SCREEN_W (960)
+#define SCREEN_H (544)
+#endif
+
+#ifndef VITAGL
 void ContextEGL_Vita::release_current() {
 	eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, context);
 }
@@ -37,13 +43,22 @@ void ContextEGL_Vita::release_current() {
 void ContextEGL_Vita::make_current() {
 	eglMakeCurrent(display, surface, surface, context);
 }
+#endif
 
 int ContextEGL_Vita::get_window_width() {
+#ifdef VITAGL
+	return SCREEN_W;
+#else
 	return width;
+#endif
 }
 
 int ContextEGL_Vita::get_window_height() {
+#ifdef VITAGL
+	return SCREEN_H;
+#else
 	return height;
+#endif
 }
 
 void ContextEGL_Vita::reset() {
@@ -52,13 +67,23 @@ void ContextEGL_Vita::reset() {
 }
 
 void ContextEGL_Vita::swap_buffers() {
+#ifdef VITAGL
+	vglSwapBuffers(GL_FALSE);
+#else
 	if (eglSwapBuffers(display, surface) != EGL_TRUE) {
 		cleanup();
 		initialize();
 	}
+#endif
 };
 
 Error ContextEGL_Vita::initialize() {
+#ifdef VITAGL
+	vglSetSemanticBindingMode(VGL_MODE_POSTPONED);
+	vglSetParamBufferSize(4 * 1024 * 1024);
+	vglUseTripleBuffering(GL_FALSE);
+	vglInitWithCustomThreshold(0, SCREEN_W, SCREEN_H, 4 * 1024 * 1024, 0, 0, 0, SCE_GXM_MULTISAMPLE_4X);
+#else
 	// Get an appropriate EGL framebuffer configuration
 	static const EGLint attributeList[] = {
 		EGL_RED_SIZE, 8,
@@ -127,7 +152,7 @@ Error ContextEGL_Vita::initialize() {
 
 	eglQuerySurface(display, surface, EGL_WIDTH, &width);
 	eglQuerySurface(display, surface, EGL_HEIGHT, &height);
-
+#endif
 	return OK;
 
 _fail2:
@@ -141,6 +166,7 @@ _fail0:
 }
 
 void ContextEGL_Vita::cleanup() {
+#ifndef VITAGL
 	if (display != EGL_NO_DISPLAY && surface != EGL_NO_SURFACE) {
 		eglDestroySurface(display, surface);
 		surface = EGL_NO_SURFACE;
@@ -155,6 +181,7 @@ void ContextEGL_Vita::cleanup() {
 		eglTerminate(display);
 		display = EGL_NO_DISPLAY;
 	}
+#endif
 }
 
 ContextEGL_Vita::ContextEGL_Vita(bool gles) :

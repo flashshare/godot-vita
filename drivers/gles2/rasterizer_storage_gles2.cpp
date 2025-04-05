@@ -115,7 +115,7 @@ PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEEXTPROC glFramebufferTexture2DMultisampleEXT
 #define glRenderbufferStorageMultisample glRenderbufferStorageMultisampleANGLE
 #define glFramebufferTexture2DMultisample glFramebufferTexture2DMultisampleANGLE
 
-#elif defined(VITA_ENABLED)
+#elif defined(VITA_ENABLED) && !defined(VITAGL)
 #include <GLES2/gl2ext.h>
 #define glRenderbufferStorageMultisample glRenderbufferStorageMultisampleIMG
 #define glFramebufferTexture2DMultisample glFramebufferTexture2DMultisampleIMG
@@ -557,7 +557,7 @@ void RasterizerStorageGLES2::texture_allocate(RID p_texture, int p_width, int p_
 			texture->images.resize(1);
 		} break;
 		case VS::TEXTURE_TYPE_EXTERNAL: {
-#if defined(ANDROID_ENABLED) || defined(VITA_ENABLED)
+#if defined(ANDROID_ENABLED) || (defined(VITA_ENABLED) && !defined(VITAGL))
 			texture->target = _GL_TEXTURE_EXTERNAL_OES;
 #else
 			texture->target = GL_TEXTURE_2D;
@@ -749,18 +749,25 @@ void RasterizerStorageGLES2::texture_set_data(RID p_texture, const Ref<Image> &p
 	int tsize = 0;
 
 	for (int i = 0; i < mipmaps; i++) {
+#ifdef VITAGL
+		if (i > 0)
+			break;
+#endif
 		int size, ofs;
 		img->get_mipmap_offset_and_size(i, ofs, size);
 
 		if (compressed) {
+#ifndef VITAGL
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
+#endif
 			int bw = w;
 			int bh = h;
 
 			glCompressedTexImage2D(blit_target, i, internal_format, bw, bh, 0, size, &read[ofs]);
 		} else {
+#ifndef VITAGL
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+#endif
 			if (texture->flags & VS::TEXTURE_FLAG_USED_FOR_STREAMING) {
 				glTexSubImage2D(blit_target, i, 0, 0, w, h, format, type, &read[ofs]);
 			} else {
@@ -832,10 +839,14 @@ Ref<Image> RasterizerStorageGLES2::texture_get_data(RID p_texture, int p_layer) 
 		int ofs = Image::get_image_mipmap_offset(texture->alloc_width, texture->alloc_height, real_format, i);
 
 		if (texture->compressed) {
+#ifndef VITAGL
 			glPixelStorei(GL_PACK_ALIGNMENT, 4);
+#endif
 			glGetCompressedTexImage(texture->target, i, &wb[ofs]);
 		} else {
+#ifndef VITAGL
 			glPixelStorei(GL_PACK_ALIGNMENT, 1);
+#endif
 			glGetTexImage(texture->target, i, texture->gl_format_cache, texture->gl_type_cache, &wb[ofs]);
 		}
 	}
@@ -5166,12 +5177,14 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, rt->depth, 0);
 		} else {
+#ifndef VITAGL
 			glGenRenderbuffers(1, &rt->depth);
 			glBindRenderbuffer(GL_RENDERBUFFER, rt->depth);
 
 			glRenderbufferStorage(GL_RENDERBUFFER, config.depth_buffer_internalformat, rt->width, rt->height);
 
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rt->depth);
+#endif
 		}
 
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -5213,6 +5226,7 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 	/* BACK FBO */
 	/* For MSAA */
 
+#ifndef VITAGL
 #ifndef JAVASCRIPT_ENABLED
 	if (rt->msaa >= VS::VIEWPORT_MSAA_2X && rt->msaa <= VS::VIEWPORT_MSAA_16X && config.multisample_supported) {
 		rt->multisample_active = true;
@@ -5256,6 +5270,7 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 		glFramebufferTexture2DMultisample(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rt->multisample_color, 0, msaa);
+#endif
 #endif
 
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -5325,6 +5340,7 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 		}
 	}
 
+#ifndef VITAGL
 	// Allocate mipmap chains for post_process effects
 	if (!rt->flags[RasterizerStorage::RENDER_TARGET_NO_3D] && rt->width >= 2 && rt->height >= 2) {
 		for (int i = 0; i < 2; i++) {
@@ -5441,7 +5457,7 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 		}
 		rt->mip_maps_allocated = true;
 	}
-
+#endif
 	glBindFramebuffer(GL_FRAMEBUFFER, RasterizerStorageGLES2::system_fbo);
 }
 
@@ -6349,6 +6365,12 @@ void RasterizerStorageGLES2::initialize() {
 	config.pvrtc_supported = config.extensions.has("GL_IMG_texture_compression_pvrtc") || config.extensions.has("WEBGL_compressed_texture_pvrtc");
 	config.support_npot_repeat_mipmap = config.extensions.has("GL_OES_texture_npot") || config.extensions.has("GL_IMG_texture_npot");
 
+#ifdef VITAGL
+	config.pvrtc_supported = true;
+	config.etc1_supported = true;
+	config.support_npot_repeat_mipmap = true;
+#endif
+
 	// If the desktop build is using S3TC, and you export / run from the IDE for android, if the device supports
 	// S3TC it will crash trying to load these textures, as they are not exported in the APK. This is a simple way
 	// to prevent Android devices trying to load S3TC, by faking lack of hardware support.
@@ -6516,6 +6538,9 @@ void RasterizerStorageGLES2::initialize() {
 
 	//picky requirements for these
 	config.support_shadow_cubemaps = config.support_depth_texture && config.support_write_depth && config.support_depth_cubemaps;
+#ifdef VITAGL
+	config.support_shadow_cubemaps = false;
+#endif
 	if (!config.support_shadow_cubemaps) {
 		print_verbose("OmniLight cubemap shadows are not supported by this GPU. Falling back to dual paraboloid shadows for all omni lights (faster but less precise).");
 	}

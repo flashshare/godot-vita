@@ -81,7 +81,7 @@ def configure(env):
     env.Prepend(CPPPATH=["{}/arm-vita-eabi/include/freetype2".format(vita_sdk_path)])
     env.Prepend(CPPPATH=["{}/share/gcc-arm-vita-eabi/samples/common".format(vita_sdk_path)])
     env.Append(LIBPATH=["{}/arm-vita-eabi/lib".format(vita_sdk_path)])
-    env.Append(LINKFLAGS=["-Wl,-q,-whole-archive", "-lpthread", "-Wl,-q,-no-whole-archive"])
+    env.Append(LINKFLAGS=["-Wl,-q,-whole-archive", "-lpthread", "-lSceSysmodule_stub", "-lSceNetCtl_stub", "-Wl,-q,-no-whole-archive"])
     print(env.get("CCFLAGS"))
 
     env.Prepend(
@@ -96,12 +96,19 @@ def configure(env):
             "-D__psp2__",
         ]
     )
+    
+    if env["vitagl"]:
+        env.Prepend(
+            CCFLAGS=[
+               "-DVITAGL",
+            ]
+        )
 
     if env["target"] == "release":
         # -O3 -ffast-math is identical to -Ofast. We need to split it out so we can selectively disable
         # -ffast-math in code for which it generates wrong results.
         if env["optimize"] == "speed":  # optimize for speed (default)
-            env.Prepend(CCFLAGS=["-O2", "-ffast-math"])
+            env.Prepend(CCFLAGS=["-O3", "-ffast-math"])
         else:  # optimize for size
             env.Prepend(CCFLAGS=["-Os"])
 
@@ -112,7 +119,7 @@ def configure(env):
 
     elif env["target"] == "release_debug":
         if env["optimize"] == "speed":  # optimize for speed (default)
-            env.Prepend(CCFLAGS=["-O2", "-ffast-math", "-DDEBUG_ENABLED"])
+            env.Prepend(CCFLAGS=["-O3", "-ffast-math", "-DDEBUG_ENABLED"])
         else:  # optimize for size
             env.Prepend(CCFLAGS=["-Os", "-DDEBUG_ENABLED"])
 
@@ -141,37 +148,77 @@ def configure(env):
     env.Append(CPPFLAGS=["-DLIBC_FILEIO_ENABLED", "-DGLES_ENABLED", "-DGL_GLEXT_PROTOTYPES"])
     env.Append(CPPFLAGS=["-DPTHREAD_NO_RENAME"])
     env.Append(CCFLAGS=["-mtune=cortex-a9", "-mfpu=neon", "-fpermissive", "-ftree-vectorize", "-Wno-attributes"])
-    env.Append(
-        LIBS=[
-            "dl",
-            "taihen_stub",
-            "SceLibKernel_stub",
-            "SceKernelThreadMgr_stub",
-            "SceSblSsMgr_stub",
-            "SceAppMgr_stub",
-            "SceIofilemgr_stub",
-            "SceSysmodule_stub",
-            "SceDisplay_stub",
-            "SceFios2_stub",
-            "SceCtrl_stub",
-            "SceMotion_stub",
-            "SceTouch_stub",
-            "SceIme_stub",
-            "SceAudio_stub",
-            "ScePower_stub",
-            "jpeg",
-            "png",
-            "freetype",
-            "opus",
-            "vorbis",
-            "ogg",
-            "z",
-            "zstd",
-            "pcre2-32",
-            "theora",
-            "-llibgpu_es4_ext_stub.a",
-            "-llibIMGEGL_stub.a",
-            "-llibGLESv2_stub.a",
-        ]
-    )
+    if env["vitagl"]:
+        env.Append(
+            LIBS=[
+                "dl",
+                "vitaGL",
+                "vitashark",
+                "SceShaccCgExt",
+                "SceShaccCg_stub",
+                "SceGxm_stub",
+                "mathneon",
+                "SceKernelDmacMgr_stub",
+                "SceCommonDialog_stub",
+                "taihen_stub",
+                "SceLibKernel_stub",
+                "SceKernelThreadMgr_stub",
+                "SceSblSsMgr_stub",
+                "SceAppMgr_stub",
+                "SceIofilemgr_stub",
+                "SceDisplay_stub",
+                "SceFios2_stub",
+                "SceCtrl_stub",
+                "SceMotion_stub",
+                "SceTouch_stub",
+                "SceIme_stub",
+                "SceAudio_stub",
+                "ScePower_stub",
+                "jpeg",
+                "png",
+                "freetype",
+                "webp",
+                "opus",
+                "vorbis",
+                "ogg",
+                "z",
+                "zstd",
+                "pcre2-32",
+                "theora",
+            ]
+        )
+    else:
+        env.Append(
+            LIBS=[
+                "dl",
+                "taihen_stub",
+                "SceLibKernel_stub",
+                "SceKernelThreadMgr_stub",
+                "SceSblSsMgr_stub",
+                "SceAppMgr_stub",
+                "SceIofilemgr_stub",
+                "SceDisplay_stub",
+                "SceFios2_stub",
+                "SceCtrl_stub",
+                "SceMotion_stub",
+                "SceTouch_stub",
+                "SceIme_stub",
+                "SceAudio_stub",
+                "ScePower_stub",
+                "jpeg",
+                "png",
+                "freetype",
+                "webp",
+                "opus",
+                "vorbis",
+                "ogg",
+                "z",
+                "zstd",
+                "pcre2-32",
+                "theora",
+                "-llibgpu_es4_ext_stub.a",
+                "-llibIMGEGL_stub.a",
+                "-llibGLESv2_stub.a",
+            ]
+        )        
     print(env.get("LIBS"))

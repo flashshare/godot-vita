@@ -41,11 +41,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef ANDROID_ENABLED
+#if !defined(ANDROID_ENABLED) && !defined(VITA_ENABLED)
 #include <sys/statvfs.h>
 #endif
 
 #ifdef VITA_ENABLED
+#define NO_STATVFS
 #include <psp2/appmgr.h>
 #include <psp2/io/stat.h>
 #endif

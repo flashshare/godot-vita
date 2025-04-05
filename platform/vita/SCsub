@@ -41,6 +41,6 @@ env.Command(
     "#bin/vita_release.zip",
     "#temp-build/vita_release",
     [
-        "cd $SOURCE && zip -r ../../$TARGET .",
+        "cd $SOURCE && 7z a ..\..\$TARGET -r .",
     ],
 )
