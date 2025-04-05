@@ -79,7 +79,7 @@ void ContextEGL_Vita::swap_buffers() {
 
 Error ContextEGL_Vita::initialize() {
 #ifdef VITAGL
-	vglSetSemanticBindingMode(VGL_MODE_POSTPONED);
+	vglSetSemanticBindingMode(VGL_MODE_SHADER_PAIR); // FIXME: This should be VGL_MODE_POSTPONED but with it there's a crash in SceLibKernel
 	vglSetParamBufferSize(4 * 1024 * 1024);
 	vglUseTripleBuffering(GL_FALSE);
 	vglInitWithCustomThreshold(0, SCREEN_W, SCREEN_H, 4 * 1024 * 1024, 0, 0, 0, SCE_GXM_MULTISAMPLE_4X);

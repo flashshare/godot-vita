@@ -72,6 +72,8 @@ int main(int argc, char *argv[]) {
 	if (res < 0) {
 		sceClibPrintf("Failed to load kernel module: %08x\n", res);
 	}
+#else
+	sceSysmoduleLoadModule(SCE_SYSMODULE_RAZOR_CAPTURE);
 #endif
 	scePowerSetArmClockFrequency(444);
 	scePowerSetBusClockFrequency(222);
