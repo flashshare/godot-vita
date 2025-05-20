@@ -220,5 +220,5 @@ def configure(env):
                 "-llibIMGEGL_stub.a",
                 "-llibGLESv2_stub.a",
             ]
-        )        
+        )
     print(env.get("LIBS"))
