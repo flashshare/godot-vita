@@ -81,7 +81,9 @@
 #endif
 
 #include <EGL/egl.h>
+#ifndef VITAGL
 #include <EGL/eglext.h>
+#endif
 #endif
 
 #if defined(MINGW_ENABLED) || defined(_MSC_VER)

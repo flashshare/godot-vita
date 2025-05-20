@@ -38,6 +38,9 @@
 
 #include <taihen.h>
 
+#ifdef VITAGL
+int _newlib_heap_size_user = 256 * 1024 * 1024;
+#else
 #ifndef MEMORY_GRAPHICS_MB
 #define MEMORY_GRAPHICS_MB 256 // Default Split, 256 Graphics/221 Main
 #endif
@@ -48,9 +51,11 @@
 
 int _newlib_heap_size_user = MEMORY_NEWLIB_MB * 1024 * 1024;
 unsigned int sceLibcHeapSize = MEMORY_SCELIBC_MB * 1024 * 1024;
+#endif
 
 int main(int argc, char *argv[]) {
 	OS_Vita os;
+#ifndef VITAGL
 	char title_id[0xA];
 	char app_dir_path[0x100];
 	char app_kernel_module_path[0x100];
@@ -67,7 +72,9 @@ int main(int argc, char *argv[]) {
 	if (res < 0) {
 		sceClibPrintf("Failed to load kernel module: %08x\n", res);
 	}
-
+#else
+	sceSysmoduleLoadModule(SCE_SYSMODULE_RAZOR_CAPTURE);
+#endif
 	scePowerSetArmClockFrequency(444);
 	scePowerSetBusClockFrequency(222);
 	scePowerSetGpuClockFrequency(222);

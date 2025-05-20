@@ -389,7 +389,9 @@ void RasterizerCanvasBaseGLES2::reset_canvas() {
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_SCISSOR_TEST);
+#ifndef VITAGL
 	glDisable(GL_DITHER);
+#endif
 	glEnable(GL_BLEND);
 
 	if (storage->frame.current_rt && storage->frame.current_rt->flags[RasterizerStorage::RENDER_TARGET_TRANSPARENT]) {
@@ -764,7 +766,9 @@ void RasterizerCanvasBaseGLES2::canvas_light_shadow_buffer_update(RID p_buffer, 
 
 	glDisable(GL_BLEND);
 	glDisable(GL_SCISSOR_TEST);
+#ifndef VITAGL
 	glDisable(GL_DITHER);
+#endif
 	glDisable(GL_CULL_FACE);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_DEPTH_TEST);

@@ -1161,8 +1161,6 @@ varying vec2 uv_interp;
 varying vec2 uv2_interp;
 #endif
 
-varying vec3 view_interp;
-
 vec3 F0(float metallic, float specular, vec3 albedo) {
 	float dielectric = 0.16 * specular * specular;
 	// use albedo * metallic as colored specular reflectance at 0 angle for metallic materials;
