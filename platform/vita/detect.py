@@ -96,7 +96,7 @@ def configure(env):
             "-D__psp2__",
         ]
     )
-    
+
     if env["vitagl"]:
         env.Prepend(
             CCFLAGS=[
