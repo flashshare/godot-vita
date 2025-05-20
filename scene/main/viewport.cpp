@@ -44,12 +44,10 @@
 #include "scene/gui/control.h"
 #include "scene/gui/label.h"
 #include "scene/gui/menu_button.h"
-#include "scene/gui/panel.h"
 #include "scene/gui/panel_container.h"
 #include "scene/gui/popup_menu.h"
 #include "scene/gui/viewport_container.h"
 #include "scene/main/canvas_layer.h"
-#include "scene/main/timer.h"
 #include "scene/resources/mesh.h"
 #include "scene/scene_string_names.h"
 #include "servers/physics_2d_server.h"
@@ -171,14 +169,14 @@ class TooltipPanel : public PanelContainer {
 	GDCLASS(TooltipPanel, PanelContainer);
 
 public:
-	TooltipPanel(){};
+	TooltipPanel() {}
 };
 
 class TooltipLabel : public Label {
 	GDCLASS(TooltipLabel, Label);
 
 public:
-	TooltipLabel(){};
+	TooltipLabel() {}
 };
 
 /////////////////////////////////////
@@ -397,7 +395,7 @@ void Viewport::_notification(int p_what) {
 				}
 			}
 
-			if (!GLOBAL_GET("physics/common/enable_pause_aware_picking")) {
+			if (!GLOBAL_GET_CACHED(bool, "physics/common/enable_pause_aware_picking")) {
 				_process_picking(false);
 			}
 		} break;
@@ -408,6 +406,7 @@ void Viewport::_notification(int p_what) {
 			gui.mouse_in_window = false;
 			_drop_physics_mouseover();
 			_drop_mouse_over();
+			_gui_cancel_tooltip();
 			// When the mouse exits the window, we want to end mouse_over, but
 			// not mouse_focus, because, for example, we want to continue
 			// dragging a scrollbar even if the mouse has left the window.
@@ -621,7 +620,7 @@ void Viewport::_process_picking(bool p_ignore_paused) {
 		bool captured = false;
 
 		if (physics_object_capture != 0) {
-			CollisionObject *co = Object::cast_to<CollisionObject>(ObjectDB::get_instance(physics_object_capture));
+			CollisionObject *co = ObjectDB::get_instance<CollisionObject>(physics_object_capture);
 			if (co && camera) {
 				_collision_object_input_event(co, camera, ev, Vector3(), Vector3(), 0);
 				captured = true;
@@ -671,14 +670,14 @@ void Viewport::_process_picking(bool p_ignore_paused) {
 
 					if (is_mouse && new_collider != physics_object_over) {
 						if (physics_object_over) {
-							CollisionObject *co = Object::cast_to<CollisionObject>(ObjectDB::get_instance(physics_object_over));
+							CollisionObject *co = ObjectDB::get_instance<CollisionObject>(physics_object_over);
 							if (co) {
 								co->_mouse_exit();
 							}
 						}
 
 						if (new_collider) {
-							CollisionObject *co = Object::cast_to<CollisionObject>(ObjectDB::get_instance(new_collider));
+							CollisionObject *co = ObjectDB::get_instance<CollisionObject>(new_collider);
 							if (co) {
 								co->_mouse_enter();
 							}
@@ -2337,7 +2336,7 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 			}
 		} else {
 			ObjectID control_id = gui.touch_focus[touch_index];
-			Control *over = Object::cast_to<Control>(ObjectDB::get_instance(control_id));
+			Control *over = ObjectDB::get_instance<Control>(control_id);
 			if (over && over->can_process()) {
 				touch_event = touch_event->xformed_by(Transform2D()); //make a copy
 				if (over == gui.last_mouse_focus) {
@@ -2384,7 +2383,7 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 	if (drag_event.is_valid()) {
 		const int drag_event_index = drag_event->get_index();
 		ObjectID control_id = gui.touch_focus[drag_event_index];
-		Control *over = Object::cast_to<Control>(ObjectDB::get_instance(control_id));
+		Control *over = ObjectDB::get_instance<Control>(control_id);
 		if (!over) {
 			over = _gui_find_control(drag_event->get_position());
 		}
@@ -2624,7 +2623,7 @@ Control *Viewport::_gui_get_drag_preview() {
 	if (!gui.drag_preview_id) {
 		return nullptr;
 	} else {
-		Control *drag_preview = Object::cast_to<Control>(ObjectDB::get_instance(gui.drag_preview_id));
+		Control *drag_preview = ObjectDB::get_instance<Control>(gui.drag_preview_id);
 		if (!drag_preview) {
 			ERR_PRINT("Don't free the control set as drag preview.");
 			gui.drag_preview_id = 0;
@@ -2664,7 +2663,7 @@ void Viewport::_gui_hid_control(Control *p_control) {
 	}
 
 	if (gui.key_focus == p_control) {
-		_gui_remove_focus();
+		gui_release_focus();
 	}
 	if (gui.mouse_over == p_control) {
 		gui.mouse_over = nullptr;
@@ -2696,11 +2695,12 @@ void Viewport::_gui_remove_control(Control *p_control) {
 	}
 }
 
-void Viewport::_gui_remove_focus() {
+void Viewport::gui_release_focus() {
 	if (gui.key_focus) {
-		Node *f = gui.key_focus;
+		Control *f = gui.key_focus;
 		gui.key_focus = nullptr;
 		f->notification(Control::NOTIFICATION_FOCUS_EXIT, true);
+		f->update();
 	}
 }
 
@@ -2717,7 +2717,7 @@ void Viewport::_gui_control_grab_focus(Control *p_control) {
 	if (gui.key_focus && gui.key_focus == p_control) {
 		return;
 	}
-	get_tree()->call_group_flags(SceneTree::GROUP_CALL_REALTIME, "_viewports", "_gui_remove_focus");
+	get_tree()->call_group_flags(SceneTree::GROUP_CALL_REALTIME, "_viewports", "gui_release_focus");
 	gui.key_focus = p_control;
 	emit_signal("gui_focus_changed", p_control);
 	p_control->notification(Control::NOTIFICATION_FOCUS_ENTER);
@@ -2787,7 +2787,7 @@ void Viewport::_drop_physics_mouseover(bool p_paused_only) {
 
 #ifndef _3D_DISABLED
 	if (physics_object_over) {
-		CollisionObject *co = Object::cast_to<CollisionObject>(ObjectDB::get_instance(physics_object_over));
+		CollisionObject *co = ObjectDB::get_instance<CollisionObject>(physics_object_over);
 		if (co) {
 			if (!co->is_inside_tree()) {
 				physics_object_over = physics_object_capture = 0;
@@ -2815,8 +2815,12 @@ List<Control *>::Element *Viewport::_gui_show_modal(Control *p_control) {
 	return node;
 }
 
-Control *Viewport::_gui_get_focus_owner() {
+Control *Viewport::gui_get_focus_owner() const {
 	return gui.key_focus;
+}
+
+Control *Viewport::gui_get_hovered_control() const {
+	return gui.mouse_over;
 }
 
 void Viewport::_gui_grab_click_focus(Control *p_control) {
@@ -3005,7 +3009,7 @@ void Viewport::set_disable_input(bool p_disable) {
 	if (p_disable == disable_input) {
 		return;
 	}
-	if (p_disable && GLOBAL_GET("gui/common/drop_mouse_on_gui_input_disabled")) {
+	if (p_disable && GLOBAL_GET_CACHED(bool, "gui/common/drop_mouse_on_gui_input_disabled")) {
 		_drop_mouse_focus();
 		_drop_mouse_over();
 		_gui_cancel_tooltip();
@@ -3454,6 +3458,10 @@ void Viewport::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("gui_is_dragging"), &Viewport::gui_is_dragging);
 	ClassDB::bind_method(D_METHOD("gui_is_drag_successful"), &Viewport::gui_is_drag_successful);
 
+	ClassDB::bind_method(D_METHOD("gui_release_focus"), &Viewport::gui_release_focus);
+	ClassDB::bind_method(D_METHOD("gui_get_focus_owner"), &Viewport::gui_get_focus_owner);
+	ClassDB::bind_method(D_METHOD("gui_get_hovered_control"), &Viewport::gui_get_hovered_control);
+
 	ClassDB::bind_method(D_METHOD("get_modal_stack_top"), &Viewport::get_modal_stack_top);
 
 	ClassDB::bind_method(D_METHOD("set_disable_input", "disable"), &Viewport::set_disable_input);
@@ -3466,7 +3474,6 @@ void Viewport::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_keep_3d_linear"), &Viewport::get_keep_3d_linear);
 
 	ClassDB::bind_method(D_METHOD("_gui_show_tooltip"), &Viewport::_gui_show_tooltip);
-	ClassDB::bind_method(D_METHOD("_gui_remove_focus"), &Viewport::_gui_remove_focus);
 	ClassDB::bind_method(D_METHOD("_post_gui_grab_click_focus"), &Viewport::_post_gui_grab_click_focus);
 
 	ClassDB::bind_method(D_METHOD("set_shadow_atlas_size", "size"), &Viewport::set_shadow_atlas_size);
