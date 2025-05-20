@@ -81,7 +81,15 @@ def configure(env):
     env.Prepend(CPPPATH=["{}/arm-vita-eabi/include/freetype2".format(vita_sdk_path)])
     env.Prepend(CPPPATH=["{}/share/gcc-arm-vita-eabi/samples/common".format(vita_sdk_path)])
     env.Append(LIBPATH=["{}/arm-vita-eabi/lib".format(vita_sdk_path)])
-    env.Append(LINKFLAGS=["-Wl,-q,-whole-archive", "-lpthread", "-lSceSysmodule_stub", "-lSceNetCtl_stub", "-Wl,-q,-no-whole-archive"])
+    env.Append(
+        LINKFLAGS=[
+            "-Wl,-q,-whole-archive",
+            "-lpthread",
+            "-lSceSysmodule_stub",
+            "-lSceNetCtl_stub",
+            "-Wl,-q,-no-whole-archive",
+        ]
+    )
     print(env.get("CCFLAGS"))
 
     env.Prepend(
@@ -100,7 +108,7 @@ def configure(env):
     if env["vitagl"]:
         env.Prepend(
             CCFLAGS=[
-               "-DVITAGL",
+                "-DVITAGL",
             ]
         )
 
