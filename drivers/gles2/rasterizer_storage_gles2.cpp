@@ -5290,7 +5290,8 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 #ifdef ANDROID_ENABLED
 			glDeleteTextures(1, &rt->multisample_color);
 #else
-			glDeleteRenderbuffers(1, &rt->multisample_color);
+		// FOR SOME REASON, FORMATTING WANTS IT LIKE THIS
+		glDeleteRenderbuffers(1, &rt->multisample_color);
 #endif
 			rt->multisample_color = 0;
 		}
