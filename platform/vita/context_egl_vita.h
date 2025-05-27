@@ -38,13 +38,22 @@
 
 #include <EGL/egl.h> // EGL library
 
+#ifdef VITAGL
+#define HAVE_GL_HEADERS
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <GLES2/gl2platform.h>
+#include <vitaGL.h>
+#else
 extern "C" {
 #include <gpu_es4/psp2_pvr_hint.h>
 }
+#endif
 
 class ContextEGL_Vita {
+#ifndef VITAGL
 	Psp2NativeWindow window;
-
+#endif
 	EGLDisplay display;
 	EGLContext context;
 	EGLSurface surface;
@@ -56,10 +65,11 @@ class ContextEGL_Vita {
 	bool gles2_context;
 
 public:
+#ifndef VITAGL
 	void release_current();
 
 	void make_current();
-
+#endif
 	int get_window_width();
 	int get_window_height();
 	void swap_buffers();

@@ -44,7 +44,7 @@
 #include <unistd.h>
 #endif
 
-#ifndef ANDROID_ENABLED
+#if !defined(ANDROID_ENABLED) && !defined(VITA_ENABLED)
 #include <sys/statvfs.h>
 #endif
 

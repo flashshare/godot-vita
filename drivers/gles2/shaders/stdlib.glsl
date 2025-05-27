@@ -380,6 +380,8 @@ highp mat4 inverse(highp mat4 m) {
 
 #ifndef USE_GLES_OVER_GL
 
+#ifndef VITAGL
+
 #if defined(TRANSPOSE_USED)
 
 highp mat2 transpose(highp mat2 m) {
@@ -404,6 +406,8 @@ highp mat4 transpose(highp mat4 m) {
 			vec4(m[0].z, m[1].z, m[2].z, m[3].z),
 			vec4(m[0].w, m[1].w, m[2].w, m[3].w));
 }
+
+#endif
 
 #if defined(OUTER_PRODUCT_USED)
 
